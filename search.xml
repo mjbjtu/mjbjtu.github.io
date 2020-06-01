@@ -1,0 +1,1314 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>Linux Cut 命令的使用</title>
+    <url>/2016/09/25/linux%20cut%20%E5%91%BD%E4%BB%A4%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<h2 id="1-作用"><a href="#1-作用" class="headerlink" title="1. 作用"></a>1. 作用</h2><p>cut命令是对文件以行为单位，按照字节、字符、指定的域分隔符对行进行剪切，提取所需要的片段内容。</p>
+<h2 id="2-用法"><a href="#2-用法" class="headerlink" title="2. 用法"></a>2. 用法</h2><p>​    cut [-bn] [file] 或cut -c [file] 或cut -[df] [file]</p>
+<p>   cut 命令从文件的每一行剪切字节、字符和字段并将这些字节、字符和字段写至标准输出。 如果不指定 File  二、参数，cut 命令将读取标准输入。必须指定 -b、-c 或 -f 标志之一。</p>
+<a id="more"></a>
+<p><strong>二、参数：</strong></p>
+<p>   -b（byte）：以字节为单位进行分割。这些字节位置将忽略多字节字符边界，除非也指定了 -n 标志</p>
+<p>　　-c（character）：以字符为单位进行分割</p>
+<p>　　-d（delimiter）：自定义分割符，默认为制表符</p>
+<p>　　-f（fileds）：与-d一起使用，指定显示哪个区域</p>
+<p>　　-n：取消分割多字节字符。仅和-b标志一起使用。如果字符的最后一个字节落在由-b标志的List参数指示换</p>
+<p>​      行范围之内，该字符将被写出；否则，该字符将被排除。</p>
+<h2 id="3-实例"><a href="#3-实例" class="headerlink" title="3. 实例"></a>3. 实例</h2><p>  <strong>1. 提取指定范围内的字符</strong></p>
+<ul>
+<li>cut -c n1-n2 filename(n1和n2是指定要截取的字符范围，n1是起始位置，n2是截止位置filename指定文件名）</li>
+</ul>
+<p>​      filename:number.txt</p>
+<p>​      10 10</p>
+<p>​      20 20<br>​      14 14<br>​      11 11</p>
+<ul>
+<li>命令：cut -c 1-2 number.txt</li>
+</ul>
+<p>​         输出：</p>
+<p>​           10<br>​          20<br>​          14<br>​          11</p>
+<p>说:文件内容是汉字的话，在Unix在汉字UTF-8编码占用的字符长度是3，所以需要将对应的一个字符的长度扩展为3。</p>
+<ul>
+<li>例如：如果文件weekday内容为：</li>
+</ul>
+<p>​     星期一<br>​     星期二<br>​     星期三<br>​     星期四<br>​     星期五<br>​     星期六<br>​     星期日</p>
+<p>   那么如果要提取出第一个汉字“星”的命令就是：cut -c 1-3 tmp</p>
+<p>  <strong>2. 提取指定范围内的字节</strong></p>
+<p>​     number.txt提取第1-2两个字节的内容</p>
+<ul>
+<li>命令：cut -b 1-2 number</li>
+</ul>
+<p>​        输出：</p>
+<p>​        10<br>​        20<br>​        14<br>​        11</p>
+<p>  <strong>3. 按照指定的域分隔符提取某个字段的内容（-d和-f配合使用）</strong></p>
+<p>​    $PATH的内容是按照:进行分割的，如果要提取出按照:分割后的第二个字段的内容</p>
+<ul>
+<li><p>命令：echo $PATH | cut -d ‘:’ -f 2</p>
+</li>
+<li><p>输出：/usr/local/sbin</p>
+</li>
+</ul>
+<p>​    </p>
+<p>　　　　　　</p>
+<p>　　 </p>
+]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>Intro-to-word2vec</title>
+    <url>/2019/10/05/intro-to-word2vec/</url>
+    <content><![CDATA[<h1 id="Intorduction-to-wordvectors"><a href="#Intorduction-to-wordvectors" class="headerlink" title="Intorduction to wordvectors"></a>Intorduction to wordvectors</h1><h2 id="0-Introduction-and-Word-vectors"><a href="#0-Introduction-and-Word-vectors" class="headerlink" title="0. Introduction and Word vectors"></a>0. Introduction and Word vectors</h2><ul>
+<li>The courses</li>
+<li>Human language and word meaning</li>
+<li>Word2vec introductions</li>
+<li>Word2vec objection function gradients</li>
+<li>Optimization basics</li>
+<li>Looking at word vectors</li>
+</ul>
+<h2 id="2-人类语言和单词的语义"><a href="#2-人类语言和单词的语义" class="headerlink" title="2. 人类语言和单词的语义"></a>2. 人类语言和单词的语义</h2><h3 id="2-1-单词的离散表示"><a href="#2-1-单词的离散表示" class="headerlink" title="2.1 单词的离散表示"></a>2.1 单词的离散表示</h3><p>在传统的自然语言处理中，将单词表示为离散的符号。例如：hotel，conference，motel -&gt;localist 表示</p>
+<p><strong>One-hot表示：</strong></p>
+<ul>
+<li>motel=[0 0 0 0 0 0 0 0 1 0 0 0]</li>
+<li>hotel=[0 0 0 0 0 0 0 1 0 0 0 0]</li>
+<li>单词向量的维度等于词汇表的大小（例如，500，000）</li>
+</ul>
+<p><strong>离散表示的问题</strong></p>
+<ul>
+<li>语义鸿沟，例如motel和hotel的语义相似，但是从向量的角度没有相似关系</li>
+<li>向量的维度会很大，而且会存稀疏的问题</li>
+</ul>
+<a id="more"></a>
+<h3 id="2-2-基于上下文对单词进行表示-分布式语义"><a href="#2-2-基于上下文对单词进行表示-分布式语义" class="headerlink" title="2.2 基于上下文对单词进行表示(分布式语义)"></a>2.2 基于上下文对单词进行表示(分布式语义)</h3><ul>
+<li>Distributional Semantics: A word’s meaning is given by the words that frequently appear close-by<ul>
+<li>“You shall know a word by the company it keeps”</li>
+<li>One of the most successful ideas of modern statistical NLP</li>
+</ul>
+</li>
+<li>When a word appear in a text, its context is the set of words that appear nearby(within a fixed-size window)</li>
+<li><p>Use the many contexts of w to build up a representation of w </p>
+<ul>
+<li>government debt problmes truming into $banking$ crises as happended in 2009</li>
+<li>saying that Europe needs unified $banking$ regulation to replace the hodgepodge</li>
+<li>India has just given its $banking$ system a shot in the arm</li>
+</ul>
+<p><strong>The Context Words will represent banking</strong></p>
+</li>
+</ul>
+<h3 id="2-3-Word-Vectors-词向量"><a href="#2-3-Word-Vectors-词向量" class="headerlink" title="2.3 Word Vectors(词向量)"></a>2.3 Word Vectors(词向量)</h3><ul>
+<li>We will build a dense vectors for each word, chosen so that it is similar to vectors of words that appear in similar contexts</li>
+<li><script type="math/tex; mode=display">
+banking= \left[
+\begin{matrix}
+ 0.286\\
+ 0.792 \\
+ -0.177\\
+ -0.107\\
+ 0.109\\
+ -0.542\\
+ 0.349\\
+0.271
+\end{matrix} 
+\right]</script></li>
+<li>Note: <strong>word vectors</strong> are somtimes called <strong>word embeddings</strong> or <strong>word representations</strong>.</li>
+</ul>
+<h2 id="3-Word2Vec"><a href="#3-Word2Vec" class="headerlink" title="3. Word2Vec"></a>3. Word2Vec</h2><h3 id="3-1-OverView"><a href="#3-1-OverView" class="headerlink" title="3.1 OverView"></a>3.1 OverView</h3><p><strong>Word2vec(Mikolov et at. 2013) is a framework for learning word vectors</strong></p>
+<p><strong>Idea:</strong></p>
+<ul>
+<li>We have a large corpus of text</li>
+<li>Every word in a fixed vocabulary is represented by a vector</li>
+<li>Go through each position t in the text, which has a center word c and context (“outside”) words o</li>
+<li>Use the similarity of the word vecotrs for c and o to calculate the probability of o given c</li>
+<li>Keep adjusting the word vectors to maximize this probability</li>
+</ul>
+<p><img src="/2019/10/05/intro-to-word2vec/word2vecOverview.png" height="250" width="500"></p>
+<h3 id="3-2-Word2Vec-目标函数"><a href="#3-2-Word2Vec-目标函数" class="headerlink" title="3.2 Word2Vec 目标函数"></a>3.2 Word2Vec 目标函数</h3><p>For each position $t=1,2,…,T$, predict context words within a window of fixed size $m$, given center word $w_j$</p>
+<p>$Likehood = L(\theta) = \prod_{t=1}^{T}\prod_{-m\leq j\leq m(j\neq0)}{P(w_{t+j}|w;\theta)}$</p>
+<ul>
+<li>$\theta$ is all variables to be optimized </li>
+</ul>
+<p><strong>Objective function $J(\theta)$ is the (average) negative log likelihood:</strong></p>
+<script type="math/tex; mode=display">J(\theta) = -\frac{1}{T}logL(\theta) = -\frac{1}{T}\sum_{t=1}^{T}\sum_{-m\leq j\leq m(j\neq 0)}{log(P(w_{t+j}|w;\theta))}</script><p><strong>Minimizing the objective function $\Leftrightarrow$Maximzing predictive accuracy</strong></p>
+<script type="math/tex; mode=display">J(\theta) = -\frac{1}{T}\sum_{t=1}^{T}\sum_{-m\leq j\leq m(j\neq 0)}{log(P(w_{t+j}|w;\theta))}</script><ul>
+<li>Question: 如何计算概率$P(W_{t+j}|w;\theta)$ ?</li>
+<li>Answer: 每个单词设置两个向量：<ul>
+<li>$v_w$ 当$w$是中心词的时候</li>
+<li>$u_w$ 当$w$不是中心词的时候</li>
+</ul>
+</li>
+<li>那么，通过中心词$c$预测上下文$o$的概率计算方法：<script type="math/tex; mode=display">P(o|c) = \frac{exp(u_{o}^Tv_{c})}{\sum_{w\in V}{exp(u^T_wv_c)}}</script></li>
+</ul>
+<h3 id="3-3-Word2vec-预测函数"><a href="#3-3-Word2vec-预测函数" class="headerlink" title="3.3 Word2vec 预测函数"></a>3.3 Word2vec 预测函数</h3><p><img src="/2019/10/05/intro-to-word2vec/prediction_function.png" height="300" width="500"></p>
+<h3 id="3-4-训练word2vec模型"><a href="#3-4-训练word2vec模型" class="headerlink" title="3.4 训练word2vec模型"></a>3.4 训练word2vec模型</h3><html>
+    <table style="margin-left: auto; margin-right: auto;">
+        <tr>
+            <td>
+               <img src="/2019/10/05/intro-to-word2vec/train_w2v_1.png" height="300" width="450"> 
+            </td>
+            <td>
+   <img src="/2019/10/05/intro-to-word2vec/train_w2v_2.png" height="300" width="500">
+            </td>
+        </tr>
+    </table>
+</html>
+
+<ul>
+<li>优化损失函数$J(\theta)$训练单词的词向量</li>
+<li>利用损失函数$J(\theta)$对所有参数即$\theta$的梯度，利用梯度下降的方法优化$J(\theta)$</li>
+<li>参数向量$\theta$的维度等于d*2*v(d是每个单词的向量维度，2表示每个单词有连个向量即中心词向量$u_w$和非中心词向量$v_w$，v表示词汇表的大小即总共有多少个单词数量)    </li>
+</ul>
+<h3 id="3-5-word2vec梯度下降的推导"><a href="#3-5-word2vec梯度下降的推导" class="headerlink" title="3.5 word2vec梯度下降的推导"></a>3.5 word2vec梯度下降的推导</h3><script type="math/tex; mode=display">max.   J^{'}(\theta) = \prod_{t=1}^{T}\prod_{-m\leq j\leq m(j\neq 0)}P(w_{t+j}|w_t;\theta)</script><p>等价于，</p>
+<script type="math/tex; mode=display">\begin{align}
+min.  J(\theta) &= -\frac{1}{T}\sum_{t=1}^{T}\sum_{-m\leq j\leq m(j\neq 0)}logP(w_{t+j}|w_t;\theta)\\
+ &= -\frac{1}{T}\sum_{t=1}^{T}[logP(w_{t-m}|w_t;\theta)+logP(w_{t-m+1}|w_t;\theta)+...+logP(w_{t+m-1}|w_t;\theta)+logP(w_{t+m}|w_t;\theta)]\\
+ & = -\frac{1}{T} \sum_{t=1}^{T} [log\frac{exp(u_{t-m}^Tv_t)}{\sum_{w\in V}exp(u_w^Tv_t)} +...+log\frac{exp(u_{t+m}^Tv_t)}{\sum_{w\in V}exp(u_w^Tv_t)}]
+ \end{align}</script><p>其中，</p>
+<script type="math/tex; mode=display">P(o|c) = \frac{exp(u^T_ov_c)}{\sum_{w\in V}exp(u_w^Tv_c)}</script><p>$J(\theta)对v_c$的偏导数：</p>
+<script type="math/tex; mode=display">\begin{align}
+\frac{\partial}{\partial v_c}logP(o|c) &= \frac{\partial}{\partial v_c}log\frac{exp(u^T_ov_c)}{\sum_{w=1}^{V}exp(u^T_wv_c)}\\
+&= \frac{\partial}{\partial v_c}log[exp(u^T_ov_c)]-\frac{\partial}{\partial v_c}log\sum_{w=1}^{V}exp(u^T_wv_c)\\
+& = \frac{\partial}{\partial v_c}u^T_ov_c-\frac{1}{\sum_{w=1}^{V}exp(u^T_wv_c)}\times \frac{\partial}{\partial v_c}\sum_{w=1}^{V}exp(u^T_wv_c)\\
+&= u_o - \frac{1}{\sum_{w=1}^{V}exp(u^T_wv_c)}\times \sum_{x=1}^{V}\frac{\partial}{\partial v_c}exp(u^T_xv_c)\\
+&= u_o - \frac{1}{\sum_{w=1}^{V}exp(u^T_wv_c)}\times \sum_{x=1}^{V}exp(u^T_xv_c)\frac{\partial}{\partial v_c}u_x^Tv_c\\
+&= u_o - \frac{1}{\sum_{w=1}^{V}exp(u^T_wv_c)}\times \sum_{x=1}^{V}exp(u^T_xv_c)u_x\\
+&= u_o - \frac{\sum_{x=1}^{V}exp(u^T_xv_c)u_x}{\sum_{w=1}^{V}exp(u^T_wv_c)}\\
+& = u_o - \sum_{x=1}^{V}\frac{exp(u^T_xv_c)}{\sum_{w=1}^{V}exp(u^T_wv_c)}u_x\\
+& = u_o - \sum_{x=1}^{V}P(x|c)\times u_x
+\end{align}</script><p>​     </p>
+<p>-[1]  [cs224n ][]</p>
+]]></content>
+      <categories>
+        <category>自然语言处理</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>linux-awk</title>
+    <url>/2016/07/01/linux-awk/</url>
+    <content><![CDATA[<h2 id="awk命令的使用"><a href="#awk命令的使用" class="headerlink" title="awk命令的使用"></a><center>awk命令的使用</center></h2><p>作用：awk是非常好用的数据处理工具，主要处理每一行的字段内的数据，默认的字段的分割符为空格键或[tab]键</p>
+<h3 id="1-awk脚本的基本结构"><a href="#1-awk脚本的基本结构" class="headerlink" title="1. awk脚本的基本结构"></a>1. awk脚本的基本结构</h3><p><strong>awk ‘BEGIN{print “start”} pattern {commands} END{print “ends”}’ file</strong> </p>
+<p>一个awk脚本通常由：BEGIN语句块、能够使用模式匹配的通用语句块、END语句块3部分组成，这三部分是可选的，任意一部分都可以不出现在脚本中，命令的主体部分通常是被单引号或双引号括住的。</p>
+<p> 例如：</p>
+<ul>
+<li>awk ‘BEGIN{i=0}{i++}END{print i}’ filename</li>
+<li>awk “BEGIN{i=0}{i++}END{print i}” filename</li>
+</ul>
+<a id="more"></a>
+<h3 id="2-awk的执行过程"><a href="#2-awk的执行过程" class="headerlink" title="2. awk的执行过程"></a>2. awk的执行过程</h3><p>  <strong>awk ‘BEGIN {commands} pattern{commands}END{commands}’ filename</strong></p>
+<ul>
+<li>第一步：执行BEGIN{commands} 语句块中的语句</li>
+<li>第二步：从文件或标准输入（stdin）读取一行，然后执行pattern{commands}语句块，它逐行扫描文件，第一行到最后一行重复这个过程，直到文件全部被读取完毕</li>
+<li><p>第三步：当读至输入流末尾时候，执行END{commands}语句块</p>
+<p>  BEGIN语句块在awk开始从输入流中读取行之前被执行，这是一个可选的语句块。比如变量的初始化、打印输出表格的表头等语句通常可以写在BEGIN语句块中。END语句块在awk从输入流读取完所有的行之后执行，比如打印所有行的分析结果这类信息汇总都是在END语句块中完成。</p>
+</li>
+</ul>
+<h3 id="3-awk内置变量"><a href="#3-awk内置变量" class="headerlink" title="3. awk内置变量"></a>3. awk内置变量</h3><ul>
+<li>$n 是当前行的按照指定域分隔符（默认是空格或[TAB]]键）分割后的第n个字段，比如n为1 表示第1个字段，n为2表示第2个字段**</li>
+<li>$0 则是记录了执行过程中当前行的文本内容</li>
+<li>NF 每一行($0)拥有的字段总数</li>
+<li>NR 目前awk所处理的”第几行”数据</li>
+<li>FNR 表示当前所处理的文本内的”第几行”数据</li>
+<li>FS 目前的域分割符号，可以通过FS字段指定文本的域分割符</li>
+<li>OFS 输出字段的分割符（默认是一个空格）</li>
+<li>ORS 输出的记录分割符（默认是一个换行）</li>
+<li>ARGIND 命令行中处理的当前文件的位置（从1开始）</li>
+<li>ARGC 命令行参数的数目</li>
+<li>ARGV 命令行参数的数组</li>
+</ul>
+<h3 id="4-awk实例"><a href="#4-awk实例" class="headerlink" title="4. awk实例"></a>4. awk实例</h3><ul>
+<li><h6 id="例1：pay-txt文件内容格式-姓名、第一个月工资、第二个月工资、第三个月工资，将每一个人的三月工资总和计算出来"><a href="#例1：pay-txt文件内容格式-姓名、第一个月工资、第二个月工资、第三个月工资，将每一个人的三月工资总和计算出来" class="headerlink" title="例1：pay.txt文件内容格式:姓名、第一个月工资、第二个月工资、第三个月工资，将每一个人的三月工资总和计算出来"></a>例1：pay.txt文件内容格式:姓名、第一个月工资、第二个月工资、第三个月工资，将每一个人的三月工资总和计算出来</h6><pre><code>  Name   1st    2nd     3th
+</code></pre><p>　         VBird   2300  3400    2500</p>
+</li>
+</ul>
+<p>　          Bmtsai  2000  2000    2300</p>
+<p>　           Bird2   4300  4200    4100</p>
+<pre><code>命令：
+
+ awk &#39;NR==1{printf (&quot;%10s%10s%10s%10s%10s\n&quot;, $1, $2, $3, $4,&quot;Total&quot;)}   
+      NR&gt;=2{total=$2+$3+\$4; printf 
+
+        (&quot;%10s%10s%10s%10s%10s\n&quot;, $1,        $2, $3, $4,total)}&#39; pay.txt
+
+      输出：![img](http://images2015.cnblogs.com/blog/976201/201608/976201-20160827173520101-1505039393.png)
+</code></pre><p>解释：NR表示当前处理的行数（行号），如果满足NR==1即处理的是第一行的内容Name 1st 2nd 3th，就执行后面的括弧中的打印（printf）命令；如果满足NR&gt;=2那么就会执行第一个括弧中的命令{total=$2+$3+$4; printf(“%10s%10s%10s%10s%10s\n”, $1, $2, $3, $4,total)}。所以，awk命令格式中的pattern决定了是否对当前输入的行执行其后面的commands。</p>
+<ul>
+<li><h6 id="例2：将a-dat的第一列内容和第二列内容相加"><a href="#例2：将a-dat的第一列内容和第二列内容相加" class="headerlink" title="例2：将a.dat的第一列内容和第二列内容相加"></a>例2：将a.dat的第一列内容和第二列内容相加</h6><pre><code> a.dat内容：   b.dat内容：
+
+  ![img](http://images2015.cnblogs.com/blog/976201/201608/976201-20160827174147319-1901016451.png)   ![img](http://images2015.cnblogs.com/blog/976201/201608/976201-20160827174217038-1697309714.png)
+
+命令：awk &#39;BEGIN{i=0;j=0}FNR==NR{array[i++]=\$1;next}{total=array[j]+\$1;print array[j],$1,total;j++}&#39;       
+
+             a.dat b.dat
+</code></pre></li>
+</ul>
+<p>　　　  或 awk ‘BEGIN{i=0;j=0}ARGIND==1{array[i++]=$1}ARGIND==2{total=array[j]+$1;print array[j],</p>
+<pre><code>              $1,total;j++}&#39; a.dat b.dat
+</code></pre><p>　　　　输出结果：<img src="http://images2015.cnblogs.com/blog/976201/201608/976201-20160827190706007-44468170.png" alt="img"></p>
+<pre><code>  解释：NR和FNR是awk内置变量，表示行号，NR表示处理的记录的行数，FNR表示当前处理的文件的行数，因为awk的参数可以同时跟多个文件名并且按照其出现的顺序逐个输入并处理，而NR表示截止当前处理的总的数，而FNR表示当前所处理的文件的行数。能能够导致读入下一个输入行，并返回到脚本的顶部，这可以避免对当前输入行执行其他的操作过程。  
+</code></pre><ul>
+<li><p>例3：去除重复记录——假设某文件test.da记录如下：</p>
+<pre><code>![img](http://images2015.cnblogs.com/blog/976201/201608/976201-20160828134747588-459898076.png)
+</code></pre><p>  命令：awk ‘ !a[$0]++{print $0}’ test.da</p>
+<p>  输出：<img src="http://images2015.cnblogs.com/blog/976201/201608/976201-20160828135225342-2009801766.png" alt="img">   </p>
+<p>  解释：awk默认数组的初始值是0，当记录已经出现在的数组a中的时候，那么!a[$0]为假，所以就不会执行后面的print $0</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>linux-sed</title>
+    <url>/2016/04/15/linux-sed/</url>
+    <content><![CDATA[<h2 id="sed命令的使用"><a href="#sed命令的使用" class="headerlink" title="sed命令的使用"></a><center>sed命令的使用</center></h2><ul>
+<li><p>作用: sed(stream editer)是以行为单位处理文本数据，可以对数据按行进行选取（显示打印）、替换、删除和新增等功能。</p>
+</li>
+<li><p>作流程：sed是一个流编辑器，它可以对从标准输入流中得到的数据进行处理，然后把处理以后得到的结果输出到标准输出，而标准输出通常关联到终端屏幕，因此处理后的结果也会显示到屏幕上。当然，也可以把标准输出重定向到文件，这样处理后的结果就会保存在磁盘文件中。</p>
+<a id="more"></a>
+</li>
+</ul>
+<h3 id="一-用法"><a href="#一-用法" class="headerlink" title="一.用法"></a>一.用法</h3><pre><code>sed [-nefr] [动作]
+</code></pre><ul>
+<li><p>参数：</p>
+<pre><code>-n: 使用安静模式，取消自动打印模式空间。在一般来自STDIN的数据一般都会被列出到屏幕上，但如果加
+      上-n参数后，则只有经过sed处理的那一行才会被列出来
+</code></pre></li>
+</ul>
+<p>　　    -e: 直接在命令行模式上进行sed的动作编辑</p>
+<p>　　    -f:  直接将sed动作写到一个文件内，-f filename可以执行filename内的sed动作</p>
+<pre><code> -i:直接修改读的文件内容，而不是由屏幕输出
+</code></pre><ul>
+<li><p>动作说明： </p>
+<ol>
+<li><p>[n1[n2]] function</p>
+<p>1.1 n1,n2一般代表选择进行动作的行数，10,20代表动作在10,20行间执行。如果不指定n1,n2，则表示后面的[动作]命令作用于与所有的行</p>
+</li>
+</ol>
+</li>
+</ul>
+<p>　　　   1.2 除了用数字选择进行动作的行的范围，也可以用正则表达式，选择进行操作的行的范围</p>
+<p>　　　　　　　 例如：打印显示所有以”#”开头的行 sed -n ‘/^#/p’ filename</p>
+<p>　　　  1.3 在进行替换命令的时候，一般需要用正则表达式所有行进行模式匹配，只有匹配成功的行，才会执行<br>                    相应的动作操作</p>
+<pre><code>   2. function有下面这参数：
+</code></pre><p>　　　　 [1] a : 新增</p>
+<p>　　　　 [2] c : 替换，c后面可以接字符串，这些字符串可以替换n1,n2之间的行</p>
+<p>　　　　 [3] d: 删除</p>
+<p>　　　　 [4] i: 插入，i之后可接字符串，这些字符串会在新的一行出现</p>
+<p>　　　　 [5] p: 打印，通常会和-n一起运行</p>
+<p>　　　　 [6] s: 替换</p>
+<h3 id="二、实例"><a href="#二、实例" class="headerlink" title="二、实例"></a>二、实例</h3><pre><code>**例1：以行为单位的删除操作：**
+</code></pre><p>　　　　  <strong>命令：nl test.da | sed ‘2,5d’</strong></p>
+<p>　　　　　输出：<img src="http://images2015.cnblogs.com/blog/976201/201608/976201-20160828143126195-768970003.png" alt="img"></p>
+<pre><code>**例2：在第2行后面添加 &quot;Drink tea\n Drink beer&quot;**
+</code></pre><p>　　　　 命令： <strong>sed ‘2,a Drink tea \n Drink beer’ test.da</strong></p>
+<pre><code>   输出：![img](http://images2015.cnblogs.com/blog/976201/201608/976201-20160828143752347-1973275231.png)
+
+ **例3：将第2~5行的内容替换成为&quot;No,2-5 Number&quot;**
+</code></pre><p>　　　　  命令：<strong>sed ‘2,5c No,2-5 Number’ test.da</strong></p>
+<pre><code>   输出：![img](http://images2015.cnblogs.com/blog/976201/201608/976201-20160828144204427-2072700502.png)
+</code></pre><p>　　 <strong>例4：打印2~5行的内容</strong></p>
+<p>　　　　命令：<strong>nl index.html | sed -n ‘2,5p’</strong> </p>
+<pre><code>  输出：![img](http://images201609.cnblogs.com/blog/976201/201609/976201-20160903171050702-895786242.png)
+</code></pre><p>　　 <strong>例5:打印除2~5行外的其他行</strong></p>
+<p>　　　　命令：<strong>nl index.html |sed -n ‘2,5!p</strong></p>
+<p>　　　　输出：<img src="http://images201609.cnblogs.com/blog/976201/201609/976201-20160903171250983-1126539198.png" alt="img"></p>
+<p>　　　　解释：打印除了第2~5行外的内容，亦即打印第1行和第6行~最后一行，所以可以用命令：<strong>nl index.html | sed -n ‘1p;6,$p’</strong></p>
+<p>　　  <strong>例6：从某一行开始，按照指定的间隔打印文件中的行，比如从第2行开始每隔3行显示文件的内容</strong></p>
+<p>　　　　命令：<strong>nl index.html | sed -n  ‘2~3p’</strong></p>
+<p>　　　　输出：<img src="http://images201609.cnblogs.com/blog/976201/201609/976201-20160903173404296-1511771823.png" alt="img"></p>
+<p>　　　　解释：单引号中的第一个数字表示起始行数，第二个数字表示间隔数</p>
+<pre><code> **例7：使用sed的s命令可以对文件中的字符串进行替换**
+</code></pre><p>　　　　  假设现在要对如下的htm文件中的email地址从jerry@zulmma.com改成emma@zulmma.com以及对年份数字2012进行替换为2013</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>My homepage<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"mailto:jerry@zulmma.com"</span>&gt;</span>Email me!<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">br</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">p</span>&gt;</span>Page created by:<span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"mailto:jerry@zulmma.com"</span>&gt;</span>jerry@zulmma.com<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">p</span>&gt;</span>copyright @ 2012 mysite!<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>　　　　  命令：<strong>sed -e ‘s/jerry@zulmma.com/emma@zulmma.com/g’ -e ‘s/\b2012\b/2013/g’ index.html</strong></p>
+<p>　　　　 输出：<img src="http://images201609.cnblogs.com/blog/976201/201609/976201-20160903165247077-1946464252.png" alt="img"></p>
+<p>　　　　　解释：sed命令中的-e选项表示指定多个编辑命令，也可以使用”;”来连接多个编辑命令。例如，上面的命令也可以表示为：</p>
+<p>sed  ‘s/jerry@zulmma.com/emma@zulmma.com/g;s/\b2012\b/2013/g’ index.html</p>
+<ul>
+<li>g:表示全局替换</li>
+<li>i:表示忽略大小写</li>
+<li><p>\b字符串\b表示正则匹配单词</p>
+<p>   <strong>例8：使用sed命令实现对指定范围行内的进行行末或行首添加字符</strong></p>
+</li>
+</ul>
+<p>　假设要对某个文件的部分行首或行末添加一定字符或字符串</p>
+<p>　　命令：sed ‘1,4s/^./#&amp;/‘ index.html |nl</p>
+<p>　　　　　  <strong><img src="http://images2015.cnblogs.com/blog/976201/201609/976201-20160904110143098-1757813728.png" alt="img"></strong></p>
+<p>　　解释：&amp;符号正则表达是所匹配的内容</p>
+]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>linux-cut</title>
+    <url>/2016/08/15/linux-cut/</url>
+    <content><![CDATA[<h2 id="cut命令的使用"><a href="#cut命令的使用" class="headerlink" title="cut命令的使用"></a>cut命令的使用</h2><p><strong>作用：</strong>cut命令是对文件以行为单位，按照字节、字符、指定的域分隔符对行进行剪切，提取所需要的片段内容。</p>
+<p><strong>一、用法</strong>：</p>
+<p>   cut [-bn] [file] 或cut -c [file] 或cut -[df] [file]</p>
+<p>   cut 命令从文件的每一行剪切字节、字符和字段并将这些字节、字符和字段写至标准输出。 如果不指定 File  二、参数，cut 命令将读取标准输入。必须指定 -b、-c 或 -f 标志之一。</p>
+<a id="more"></a>
+<p><strong>二、参数：</strong></p>
+<p>   -b（byte）：以字节为单位进行分割。这些字节位置将忽略多字节字符边界，除非也指定了 -n 标志</p>
+<p>　　-c（character）：以字符为单位进行分割</p>
+<p>　　-d（delimiter）：自定义分割符，默认为制表符</p>
+<p>　　-f（fileds）：与-d一起使用，指定显示哪个区域</p>
+<p>　　-n：取消分割多字节字符。仅和-b标志一起使用。如果字符的最后一个字节落在由-b标志的List参数指示换</p>
+<pre><code>  行范围之内，该字符将被写出；否则，该字符将被排除。
+</code></pre><p><strong>三、实例</strong></p>
+<p>  <strong>1. 提取指定范围内的字符</strong></p>
+<pre><code>  （1）cut -c n1-n2 filename(n1和n2是指定要截取的字符范围，n1是起始位置，n2是截止位置filename指      定文件名）
+
+  filename:number.txt
+
+  10 10
+
+  20 20
+  14 14
+  11 11
+</code></pre><p>　　       命令：cut -c 1-2 number.txt</p>
+<pre><code>     输出：
+
+          10
+          20
+          14
+          11
+
+说明：文件内容是汉字的话，在Unix在汉字UTF-8编码占用的字符长度是3，所以需要将对应的一个字符的      长度扩展为3。
+</code></pre><p>   （2） 例如：如果文件weekday内容为：</p>
+<pre><code>    星期一
+    星期二
+    星期三
+    星期四
+    星期五
+    星期六
+    星期日
+</code></pre><p>  那么如果要提取出第一个汉字“星”的命令就是：cut -c 1-3 tmp</p>
+<p>  <strong>2. 提取指定范围内的字节</strong></p>
+<p>　　   （1）number.txt提取第1-2两个字节的内容</p>
+<p>　　　　　  命令：cut -b 1-2 number</p>
+<pre><code>    输出：
+
+    10
+    20
+    14
+    11
+</code></pre><p>  <strong>3. 按照指定的域分隔符提取某个字段的内容（-d和-f配合使用）</strong></p>
+<pre><code>  （1）$PATH的内容是按照:进行分割的，如果要提取出按照:分割后的第二个字段的内容
+
+   命令：echo $PATH | cut -d &#39;:&#39; -f 2
+
+   输出：/usr/local/sbin
+</code></pre><p>​    </p>
+<p>　　　　　　</p>
+<p>　　 </p>
+]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>makefile</title>
+    <url>/2017/08/15/makefile/</url>
+    <content><![CDATA[<h2 id="C-C-程序Makefile文件"><a href="#C-C-程序Makefile文件" class="headerlink" title="C/C++程序Makefile文件"></a>C/C++程序Makefile文件</h2><h3 id="1-引言"><a href="#1-引言" class="headerlink" title="1. 引言"></a>1. 引言</h3><pre><code> 从我们刚开始编写一个简单的C/C++ &quot;Hello,World！&quot;，到将其编译、运行处结果—这部分工作IDE（集成开发环境）帮我们做了，包括语法错误检查，编译，调试，执行二进制程序。大部分时间我们只关注程序代码本身的编写，如何在Linux下对C/C++源代码的    进行有效管理，包括编译、链接、调试，make工具可以帮助我们完成这部分的工作。
+</code></pre><a id="more"></a>
+<h3 id="2-从“hello-World”说起"><a href="#2-从“hello-World”说起" class="headerlink" title="2. 从“hello, World”说起"></a>2. 从“hello, World”说起</h3><h4 id="2-1-执行单个源文件"><a href="#2-1-执行单个源文件" class="headerlink" title="2.1 执行单个源文件"></a>2.1 执行单个源文件</h4><pre><code>一个编写好的C或C++代码源程序需要通过编译、链接等步骤才能生成可执行的二进制文件。 例如：源文件：hello_world.c的源码为：
+</code></pre><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"Hello, Wolrd\n"</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>第一步：编译生成目标文件 hello_world.o  (<a href="http://baike.baidu.com/link?url=FYHeJ8-9OQaGYVRUXyJyiIEEQro6vFfH10YR1ZfIajPXsCTnyXFWDJWlJ3y6ar5aE39SUq7w6haAzzXa3wJoax6g_7janpJoYegv4NWnz8C" target="_blank" rel="noopener">gcc </a>-c hello_world.c )</li>
+<li>第二步：链接（这里只有一个hello_world.o）生成可执行文件hello_world(gcc -o hello_world hello_world.o)</li>
+</ul>
+<h4 id="2-2-编译多个源文件"><a href="#2-2-编译多个源文件" class="headerlink" title="2.2 编译多个源文件"></a>2.2 编译多个源文件</h4><ul>
+<li>print_hello_world.c</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">print_hello_world</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"Hello, Wolrd\n"</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>say_ok.c </p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">say_ok</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"OK\n"</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>main. c</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main1</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"This is main.c file!\n"</span>);</span><br><span class="line">    print_hello_world():</span><br><span class="line">    sya_ok();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>生成目标对象文件(OBJ)</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">gcc -c print_hello_world.c  =&gt; print_hello_world.o</span><br><span class="line">gcc -c say_ok.c             =&gt; say_ok.o</span><br><span class="line">gcc -c main1.c               =&gt; main1.o</span><br></pre></td></tr></table></figure>
+<ol>
+<li>链接生成可执行文件(main)</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">gcc -o main print_hello_world.o say_ok.o main1.o</span><br></pre></td></tr></table></figure>
+<h3 id="3-管理多个源程序文件"><a href="#3-管理多个源程序文件" class="headerlink" title="3. 管理多个源程序文件"></a>3. 管理多个源程序文件</h3><pre><code>   通常我们在编写项目的时候不可能只有一个源文件程序（main.c/main.cpp），一般情况下会有多个源文件（.c/.cpp）和头文件需要管理。正如前面所描述的如果有三个源文件hello_world.c, say_ok.c, main1.c,每次当我们对源码修改过后，都必须重新运行一遍所有的编译命令，试     想一 下如果文件不止三个，而是有很多个的时候......这将对程序员无疑是一个灾难。所以，我们必须寻求一个有效的的程序源码管理方式—make机制可以帮助我们解决这个问题。
+</code></pre><ul>
+<li>make<ul>
+<li>make命令是系统管理员和程序员用的最频繁的命令之一。管理员用它通过命令行来编译和安装很多开源的工具，程序员用它来管理他们大型复杂的项目编译问题。</li>
+</ul>
+</li>
+<li>makefile文件书写格式<ul>
+<li>目标:原料</li>
+</ul>
+</li>
+</ul>
+<p>　　　　<Tab>加工方法</Tab></p>
+<ul>
+<li>makefile实例</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">main:main.o haha.o sin_value.o cos_value.o</span><br><span class="line">	gcc -g -o main main.o haha.o sin_value.o cos_value.o -lm </span><br><span class="line">main.o:main.c</span><br><span class="line">	gcc -g -c main.c</span><br><span class="line">haha.o:haha.c</span><br><span class="line">	gcc -g -c haha.c</span><br><span class="line">sin_value.o:sin_value.c</span><br><span class="line">	gcc -g -c sin_value.c</span><br><span class="line">cos_value.o:cos_value.c</span><br><span class="line">	gcc -g -c cos_value.c</span><br><span class="line">clean:</span><br><span class="line">	rm -f main main.o haha.o sin_value.o cos_value.o</span><br></pre></td></tr></table></figure>
+<ul>
+<li>make常用选项<ul>
+<li>-B 选项: make 命令不会编译那些自从上次编译之后就没有更改的文件，但是，如果你想覆盖 make 这种默认的行为，可以使用-B选项</li>
+<li>-g选项：调试选项，用于GDB调试</li>
+<li>clean: 清除所有当前的对象文件好和执行文件</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>linux-grep</title>
+    <url>/2016/06/15/linux-grep/</url>
+    <content><![CDATA[<h2 id="grep命令的使用"><a href="#grep命令的使用" class="headerlink" title="grep命令的使用"></a><center>grep命令的使用</center></h2><p><strong>作用：</strong>grep可以解析一行文字，取得关键字，若该行存在关键字，就会整行列出。</p>
+<p>　　   grep [-acinv] [—color=auto] ‘查找字符串’ filename</p>
+<p><strong>一、参数</strong></p>
+<p>　　-a: 将binary文件以text方式查找数据</p>
+<p>　　-c: 计算找到匹配字符串的行数</p>
+<p>　　-i: 忽略大小写的不同，所有大小写视为相同</p>
+<p>　　-n: 输出行号</p>
+<p>　　-o: 只输出匹配上的字符串</p>
+<pre><code>    -w: 精确匹配词语
+</code></pre><p>　　-v: 反向选择，即显示出没有”查找字符串”内容的那一行</p>
+<pre><code>--color=auto: 可以将找到的关键字部分加上颜色显示
+</code></pre><p><strong>二、实例</strong></p>
+<ul>
+<li><p>例1：查找某一目录下的所有包含指定字符串的文件</p>
+<pre><code>    grep -n &#39;the&#39; ./*
+</code></pre></li>
+<li><p>例2：查找包含tuse和test字符串的行</p>
+</li>
+</ul>
+<p>　　　　 grep -n ‘t[ue]st’ filename</p>
+<ul>
+<li>例3：查找空行与非空行</li>
+</ul>
+<p>　　　　 grep -n ‘^$’ filename</p>
+]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>linux_sort_uniq</title>
+    <url>/2016/10/15/linux-sort-uniq/</url>
+    <content><![CDATA[<h2 id="sort-uniq"><a href="#sort-uniq" class="headerlink" title="sort, uniq"></a>sort, uniq</h2><p><strong>一、sort命令的使用</strong></p>
+<p>   <strong>1. 作用：</strong>sort命令顾名思意，其可以帮助我们进行排序，而且可以依据不同的数据类型来排序。例如数字和文字的排序就不一样，sort可以指定不同的选项从而使得排序依据也不同，影响排序结果。</p>
+<a id="more"></a>
+<p>   <strong>2. 选项：</strong></p>
+<p>　　　　-f:忽略大小写的差异，例如A与a视为编码相同；</p>
+<p>　　　　-b:忽略最前面的空格部分；</p>
+<p>　　　　-M:以月份的名字来排序，例如JAN，DEC等的排序方法；</p>
+<p>​      -n:使用“纯数字”进行排序（默认是以文字类型来排序的）；</p>
+<p>　　　　-r:反向排序</p>
+<p>　　　　-u:uniq, 相同的数据中，仅出现一行代表</p>
+<p>　　　　-t:分割符，默认是用[Tab]键来分割；</p>
+<p>　　　　-k:以哪个区间来进行排序的意思；</p>
+<p>   <strong>3.实例</strong></p>
+<p>​     例：对最近登录系统的用户按照其名字的字典序进行排序</p>
+<p>​     命令：<strong>who | sort -t ‘ ‘ -k 1</strong></p>
+<p>　　  输出：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">andre pts&#x2F;18 2016-09-24 16:39 (211.71.66.211)</span><br><span class="line">bl :2004 2016-09-12 10:15 (211.71.66.80)</span><br><span class="line">bl pts&#x2F;13 2016-09-12 10:17 (:2004.0)</span><br><span class="line">lmt :2006 2016-07-13 22:40 (211.71.66.202)</span><br><span class="line">mj pts&#x2F;10 2016-09-25 08:22 (211.71.66.191)</span><br><span class="line">xiaobing :2002 2016-07-04 22:02 (211.71.66.202)</span><br><span class="line">xiaobing :2003 2016-07-21 14:52 (211.71.66.70)</span><br><span class="line">xiaobing pts&#x2F;4 2016-07-21 09:31 (:2002.0)</span><br><span class="line">xiaobing pts&#x2F;6 2016-07-06 10:37 (:2002.0)</span><br></pre></td></tr></table></figure>
+<p><strong>一、uniq命令的使用</strong>  </p>
+<p>   <strong>1. 作用：去除重复的数据</strong></p>
+<p>   <strong>2. 选项：</strong></p>
+<p>　　　　  -i:忽略大小写字符的不同</p>
+<p>　　　　  -c:进行计数</p>
+<p>   <strong>3.实例</strong></p>
+<p>​     例：如果需要统计最后登录系统的10个用户以及登陆的次数</p>
+<p>​     命令：last -10 | head -9 | cut -d ‘ ‘ -f 1 | sort | uniq -c</p>
+<p>​     输出：</p>
+<p>​        1 andre<br>​        1 lmt<br>​        2 mj<br>​        5 zmm</p>
+]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>vim_config</title>
+    <url>/2017/04/15/vim-config/</url>
+    <content><![CDATA[<h3 id="1-引言"><a href="#1-引言" class="headerlink" title="1. 引言"></a>1. 引言</h3><p>　　 1. vim是一款功能强大的文本编辑器，如果使用熟练，将会有效帮助我们提高编辑文本、程序的效率。vim编辑器的上手使用门槛比较高，很多人怯于要记很多命令，往往在学习的初期阶段就望而却步。</p>
+<p>　　 2. vim的学习需要不断的练习、使用，只有强迫自己不断的使用，才能在使用的过程中记住那些看似复杂的命令，但是如果一旦习惯了vim的编辑模式，就会觉得vim真的会帮助我们提高文本编辑效率。</p>
+<ol>
+<li><p>关于vim学习资料，其本自带的vim帮助文档，就足够丰富，可以在学习的过程不断查阅。另外，也有一个简化的入手文档即vimtutor，在命令行输入vimtutor，便可以开始学习，大概不到一个小时就可以学习并练习完。</p>
+<a id="more"></a>
+</li>
+</ol>
+<h3 id="2-配置"><a href="#2-配置" class="headerlink" title="2. 配置"></a>2. 配置</h3><p>　　 1. vim的配置文件有全局配置(一般在目录/etc/vim/vimrc)和个人配置(/home/username/.vimrc)下，全局配置文件对系统所有的用户都生效，个人配置文件只对用户自的使用环境生效</p>
+<p>　　 2. vim的配置文件一般网上都会有别人已经设置好的配置，可以复制到自己的个人配置文件里直接使用，也可以根据需要自己定制自己的使用环境</p>
+<h3 id="3-配置脚本"><a href="#3-配置脚本" class="headerlink" title="3. 配置脚本"></a>3. 配置脚本</h3><ul>
+<li>在之前的使用过程中，本人参考资料根据个人需要配置了一份自己的配置脚本，其中大部分都有注释说明，可以根据需要自己配置。注：”开始的在vimrc中表示注释</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">set termencoding=utf8</span><br><span class="line"></span><br><span class="line">set hlsearch</span><br><span class="line">"行号</span><br><span class="line">set nu</span><br><span class="line">"语法高亮</span><br><span class="line">syntax on</span><br><span class="line">"启用鼠标</span><br><span class="line">set mouse=v</span><br><span class="line">"自动缩进</span><br><span class="line">"突出显示列</span><br><span class="line">"set cursorcolumn</span><br><span class="line">"突出显示当前行</span><br><span class="line">set cursorline</span><br><span class="line">"高亮显示当前行</span><br><span class="line">"hi CursorLine cterm=NONE ctermbg=magenta ctermfg=white guibg=darked guifg=white</span><br><span class="line">set autoindent</span><br><span class="line">"set guifont=Monaco:h80 " 字体 &amp;&amp; 字号</span><br><span class="line">"去掉讨厌的有关vi一致性模式，避免以前版本的一些bug和局限</span><br><span class="line">set nocompatible</span><br><span class="line">"依据上面的对齐格式，智能的选择对起方式，对于类似C语言编写上很有用</span><br><span class="line">set smartindent</span><br><span class="line">"设置缩进</span><br><span class="line">set tabstop=4</span><br><span class="line">set softtabstop=4</span><br><span class="line">set shiftwidth=4</span><br><span class="line">"在状态栏显示正在输入的命令</span><br><span class="line">set showcmd</span><br><span class="line">"左下角显示当前vim模式</span><br><span class="line">set showmode</span><br><span class="line">" 代码折叠</span><br><span class="line">set foldenable</span><br><span class="line">set foldmethod=indent</span><br><span class="line">set foldlevel=99</span><br><span class="line">"显示标尺</span><br><span class="line">set ruler</span><br><span class="line">"打开文件类型自动检测功能</span><br><span class="line">filetype on</span><br><span class="line">set completeopt=longest,menu</span><br><span class="line">"启动自动补全</span><br><span class="line">"filetype plugin indent on</span><br><span class="line">"在分割的窗口间移动</span><br><span class="line">:nnoremap &lt;C-h&gt; &lt;C-w&gt;h</span><br><span class="line">:nnoremap &lt;C-j&gt; &lt;C-w&gt;j</span><br><span class="line">:nnoremap &lt;C-k&gt; &lt;C-w&gt;k</span><br><span class="line">:nnoremap &lt;C-l&gt; &lt;C-w&gt;l</span><br><span class="line"></span><br><span class="line">"当新建 .h .c .hpp .cpp 等文件时自动调用SetTitle 函数</span><br><span class="line">autocmd BufNewFile *.[ch],*.php,*.cpp exec "call SetTitle()"</span><br><span class="line">function SetComment()</span><br><span class="line">call setline(1,"/*========================================================")</span><br><span class="line">call append(line("."), "* Copyright (C) ".strftime("%Y")." All rights reserved.")</span><br><span class="line">call append(line(".")+1, "* ")</span><br><span class="line">call append(line(".")+2, "* 文件名称：".expand("%:t"))</span><br><span class="line">call append(line(".")+3, "* 创 建 者：mj")</span><br><span class="line">call append(line(".")+4, "* 创建日期：".strftime("%Y年%m月%d日"))</span><br><span class="line">call append(line(".")+5, "* 描 述：")</span><br><span class="line">call append(line(".")+6, "*")</span><br><span class="line">call append(line(".")+7, "================================================================*/")</span><br><span class="line">endfunction</span><br><span class="line">"定义函数SetTitle，自动插入文件头</span><br><span class="line">function SetTitle()</span><br><span class="line">call SetComment()</span><br><span class="line">if expand("%:e") == 'php'</span><br><span class="line">call append(line(".")+8, "#ifndef _".toupper(expand("%:t:r"))."_H")</span><br><span class="line">call append(line(".")+9, "#define _".toupper(expand("%:t:r"))."_H")</span><br><span class="line">call append(line(".")+10, "#ifdef __cplusplus")</span><br><span class="line">call append(line(".")+11, "extern \"C\"")</span><br><span class="line">call append(line(".")+12, "&#123;")</span><br><span class="line">call append(line(".")+13, "#endif")</span><br><span class="line">call append(line(".")+14, "")</span><br><span class="line">call append(line(".")+15, "#ifdef __cplusplus")</span><br><span class="line">call append(line(".")+16, "&#125;")</span><br><span class="line">call append(line(".")+17, "#endif")</span><br><span class="line">call append(line(".")+18, "#endif //".toupper(expand("%:t:r"))."_H")</span><br><span class="line">elseif expand("%:e") == 'h'</span><br><span class="line">"call append(line(".")+8, "#pragma once")</span><br><span class="line">elseif &amp;filetype == 'c'</span><br><span class="line">call append(line(".")+8,"#include &lt;stdio.h&gt;")</span><br><span class="line">call append(line(".")+9,"#include &lt;stdlib.h&gt;")</span><br><span class="line">call append(line(".")+10," ")</span><br><span class="line">call append(line(".")+11," ")</span><br><span class="line">call append(line(".")+12,"int main() ")</span><br><span class="line">call append(line(".")+13,"&#123;")</span><br><span class="line">call append(line(".")+14," return EXIT_SUCCESS;")</span><br><span class="line">call append(line(".")+15,"&#125;")</span><br><span class="line">elseif &amp;filetype == 'cpp'</span><br><span class="line">"call append(line(".")+8, "#include \"".expand("%:t:r").".h\"")</span><br><span class="line">call append(line(".")+8, "#include &lt;iostream&gt;")</span><br><span class="line">call append(line(".")+9, "#include &lt;string&gt;")</span><br><span class="line">call append(line(".")+10,"#include &lt;cstdlib&gt;")</span><br><span class="line">call append(line(".")+11," ")</span><br><span class="line">call append(line(".")+12,"using namespace std;")</span><br><span class="line">call append(line(".")+13," ")</span><br><span class="line"></span><br><span class="line">call append(line(".")+13," ")</span><br><span class="line">call append(line(".")+14,"int main() ")</span><br><span class="line">call append(line(".")+15,"&#123;")</span><br><span class="line">call append(line(".")+16," return EXIT_SUCCESS;")</span><br><span class="line">call append(line(".")+17,"&#125;")</span><br><span class="line">endif</span><br><span class="line">endfunction</span><br><span class="line">autocmd BufNewFile *.sh exec "call SetBashTitle()"</span><br><span class="line">function SetBashTitle()</span><br><span class="line">call setline(1,"#!/bin/bash")</span><br><span class="line">endfunction</span><br><span class="line">"自动补全</span><br><span class="line">":inoremap ( ()&lt;ESC&gt;i</span><br><span class="line">":inoremap ) &lt;c-r&gt;=ClosePair(')')&lt;CR&gt;</span><br><span class="line">":inoremap &#123; &#123; &#125;&lt;ESC&gt;</span><br><span class="line">:inoremap &#125; &lt;c-r&gt;=ClosePair('&#125;')&lt;CR&gt;</span><br><span class="line">:inoremap [ []&lt;ESC&gt;i</span><br><span class="line">:inoremap ] &lt;c-r&gt;=ClosePair(']')&lt;CR&gt;</span><br><span class="line">:inoremap ' ''&lt;ESC&gt;i</span><br><span class="line">function! ClosePair(char)</span><br><span class="line">if getline('.')[col('.') - 1] == a:char</span><br><span class="line">return "\&lt;Right&gt;"</span><br><span class="line">else</span><br><span class="line">return a:char</span><br><span class="line">endif</span><br><span class="line">endfunction</span><br><span class="line"></span><br><span class="line">"设置退格键</span><br><span class="line">set backspace=indent,eol,start</span><br></pre></td></tr></table></figure>
+<ul>
+<li>vim主题配置</li>
+</ul>
+<p>　　vim自带了很多主题设置，一般可以在/usr/share/vim/vim72/colors目录中查看当前版本的vim的颜色方案，可以在.vimrc中用colorscheme  darkblue或者其主题进行vim的主题配置。也可以按照脚本配置其不同或稍复杂的颜色方案，下面一段脚本就是根据每天的不同时间段配置vim的颜色方案   <em>“根据时间段不同，设置vim的不同配色方案</em></p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="keyword">function</span> SetTimeOfDayColors()</span><br><span class="line"><span class="built_in">let</span> currentHour = strftime(<span class="string">"%H"</span>)</span><br><span class="line"><span class="built_in">let</span> colorScheme=<span class="string">""</span></span><br><span class="line"><span class="keyword">if</span> currentHour &lt; 1 + 0</span><br><span class="line"><span class="built_in">let</span> colorScheme = <span class="string">"blue"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"setting colorscheme to blue"</span></span><br><span class="line">elseif currentHour &lt; 2 + 0</span><br><span class="line"><span class="built_in">let</span> colorScheme=<span class="string">"darkblue"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"setting colorscheme to darkblue"</span></span><br><span class="line">elseif currentHour &lt; 3 + 0</span><br><span class="line"><span class="built_in">let</span> colorScheme=<span class="string">"default"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"setting colorscheme to default"</span></span><br><span class="line">elseif currentHour &lt; 4 + 0</span><br><span class="line"><span class="built_in">let</span> colorScheme=<span class="string">"delek"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"setting colorscheme to delek"</span></span><br><span class="line">elseif currentHour &lt; 5 + 0</span><br><span class="line"><span class="built_in">let</span> colorScheme=<span class="string">"desert"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"setting colorscheme to desert"</span></span><br><span class="line">elseif currentHour &lt; 6 + 0</span><br><span class="line"><span class="built_in">let</span> colorScheme=<span class="string">"elflord"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"setting colorscheme to elflord"</span></span><br><span class="line">elseif currentHour &lt; 7 + 0</span><br><span class="line"><span class="built_in">let</span> colorScheme=<span class="string">"evening"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"setting colorscheme to evening"</span></span><br><span class="line">elseif currentHour &lt; 8 + 0</span><br><span class="line"><span class="built_in">let</span> colorScheme=<span class="string">"koehler"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"setting colorscheme to koehler"</span></span><br><span class="line">elseif currentHour &lt; 9 + 0</span><br><span class="line"><span class="built_in">let</span> colorScheme=<span class="string">"morning"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"setting colorscheme to morning"</span></span><br><span class="line">elseif currentHour &lt; 10 + 0</span><br><span class="line"><span class="built_in">let</span> colorScheme=<span class="string">"murphy"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"setting colorscheme to murphy"</span></span><br><span class="line">elseif currentHour &lt; 11 + 0</span><br><span class="line"><span class="built_in">let</span> colorScheme=<span class="string">"pablo"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"setting colorscheme to pablo"</span></span><br><span class="line">elseif currentHour &lt; 12 + 0*</span><br><span class="line"></span><br><span class="line"><span class="built_in">let</span> colorScheme=<span class="string">"peachpuff"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"setting colorscheme to peachpuff"</span></span><br><span class="line">elseif currentHour &lt; 13 + 0</span><br><span class="line"><span class="built_in">let</span> colorScheme=<span class="string">"ron"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"setting colorscheme to ron"</span></span><br><span class="line">elseif currentHour &lt; 14 + 0</span><br><span class="line"><span class="built_in">let</span> colorScheme=<span class="string">"shine"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"setting colorscheme to shine"</span></span><br><span class="line">elseif currentHour &lt; 15 + 0</span><br><span class="line"><span class="built_in">let</span> colorScheme=<span class="string">"desert"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"setting colorscheme to desert"</span></span><br><span class="line">elseif currentHour &lt; 16 + 0</span><br><span class="line"><span class="built_in">let</span> colorScheme = <span class="string">"torte"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"setting colorscheme to torte"</span></span><br><span class="line">elseif currentHour &lt; 17 + 0</span><br><span class="line"><span class="built_in">let</span> colorScheme=<span class="string">"zellner"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"setting colorscheme to zellner"</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line"><span class="built_in">let</span> colorScheme=<span class="string">"desert"</span></span><br><span class="line">endif</span><br><span class="line">execute <span class="string">"colorscheme "</span> . colorScheme</span><br><span class="line">endfunction</span><br><span class="line">call SetTimeOfDayColors()</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>python 的动态类型</title>
+    <url>/2020/05/31/python-language/</url>
+    <content><![CDATA[<h2 id="python-的动态类型"><a href="#python-的动态类型" class="headerlink" title="python 的动态类型"></a>python 的动态类型</h2><h3 id="1-python-的变量名"><a href="#1-python-的变量名" class="headerlink" title="1. python 的变量名"></a>1. python 的变量名</h3><p>​    在Python中，变量不需要事先申明，并且在定义的时候不需要指定类型，直接赋值就可以。例如：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">a = <span class="number">1</span></span><br><span class="line">b = <span class="string">"hello,world"</span></span><br><span class="line">c = (<span class="number">1</span>,<span class="number">2</span>)</span><br><span class="line">d = [<span class="number">1</span>,<span class="number">3</span>,<span class="number">4</span>]</span><br><span class="line">e = &#123;<span class="number">1</span>,<span class="number">3</span>,<span class="number">4</span>&#125;</span><br><span class="line">f = &#123;<span class="number">1</span>:<span class="string">"1"</span>,<span class="number">2</span>:<span class="string">"2"</span>,<span class="number">3</span>:<span class="string">"3"</span>&#125;</span><br></pre></td></tr></table></figure>
+<p>因为，在Python中所有数据都是一个对象（object）类型，变量（例如上文的a,b,c,d,e,f）仅仅代表一个名称而已，其是指向对象类型的一个引用。例如，变量名a就是一个指向整数对象object(1)的引用，其他变量名类似。</p>
+<a id="more"></a>
+<h3 id="2-Python的对象"><a href="#2-Python的对象" class="headerlink" title="2. Python的对象"></a>2. Python的对象</h3><p>​       Python中对象有三个属性：id，type，value。例如Object(“hello, world”)就是一个对象，其id是可以通过id(a)获取得到，type也可以通过type(a)获取，value则是通过a直接获取。</p>
+<p>​       当我们在程序中编写如下第一条代码语句后，Python语言会生成一个对象ojbect(“hello,world”)，然后将变量名a和对象object(“hello,world”)进行绑定，同时对象也会记录下指向该对象的引用个数。例如，此时指向object(”hello,world”)的引用个数就是1。但是，当我们再写下另外一条语句x=b后，相当于又将一个变量名x和对象进行了绑定，此时指向对象object(“hello,world”)的引用个数就是2。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">b = <span class="string">"hello,world"</span></span><br><span class="line">x = b</span><br><span class="line">print(id(b)==id(x)) <span class="comment"># True</span></span><br></pre></td></tr></table></figure>
+<p>​       那么，如何查看指向某个对象的引用的个数呢，Python中可以利用<strong>sys.getrefcount()</strong>函数返回指向某个对象的引用的个数。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> sys</span><br><span class="line">b = <span class="string">"hello,world"</span></span><br><span class="line"><span class="comment"># 此时输出值是2，为什么会是2而不是1呢？因为我们在调用sys.getrefcount()函数时候，将b作为参数传入到函数中，相当于多了一个指向b的引用，所以此时是2</span></span><br><span class="line">print(sys.getrefcount(b)) <span class="comment"># 2</span></span><br><span class="line">x = b</span><br><span class="line"><span class="comment"># 此时的输出值应该是3</span></span><br><span class="line">print(sys.getrefcount(b)) <span class="comment"># 3</span></span><br><span class="line">print(sys.getrefcount(x)) <span class="comment"># 3 </span></span><br><span class="line"><span class="keyword">del</span> x</span><br><span class="line">print(sys.getrefcount(b)) <span class="comment"># 2</span></span><br></pre></td></tr></table></figure>
+<h3 id="3-Python数据对象类型"><a href="#3-Python数据对象类型" class="headerlink" title="3. Python数据对象类型"></a>3. Python数据对象类型</h3><p> Python的数据对象分为可变数据对象和不可变数据对象，其中可变数据对象例如：List，Dict；而不可变数据对象例如数值对象，Tuple对象，字符串对象。</p>
+<h4 id="3-1-可变数据对象"><a href="#3-1-可变数据对象" class="headerlink" title="3.1 可变数据对象"></a>3.1 可变数据对象</h4><p>​    <strong>python可边数据对象是指可以通过引用改变其对象元素的对象类型</strong>。例如：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">a = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">4</span>]</span><br><span class="line">b = a</span><br><span class="line">b[<span class="number">0</span>]=<span class="number">-1</span></span><br><span class="line">print(a) <span class="comment"># [-1,2,4]</span></span><br><span class="line">print(b) <span class="comment">#[-1,2,4] 通过对象引用b改变对象的第一个元素的值</span></span><br><span class="line"></span><br><span class="line">c_dic = &#123;<span class="number">1</span>:<span class="string">'1'</span>,<span class="number">2</span>:<span class="string">'2'</span>&#125;</span><br><span class="line">d_dic = c_dic</span><br><span class="line">c_dic[<span class="number">1</span>]=<span class="string">"3"</span></span><br><span class="line">print(c_dic) <span class="comment"># &#123;1:'3',2:'2'&#125;</span></span><br><span class="line">print(d_dic) <span class="comment"># &#123;1:'3',2:'2'&#125;</span></span><br></pre></td></tr></table></figure>
+<h4 id="3-2-不可变数据对象"><a href="#3-2-不可变数据对象" class="headerlink" title="3.2 不可变数据对象"></a>3.2 不可变数据对象</h4><pre><code> **不可变对象类型是指不能通过引用改变其对象值，而只能改变引用的指向。** 例如：
+</code></pre><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">a = <span class="number">1000</span></span><br><span class="line">b = a</span><br><span class="line">print(id(a)==id(b)) <span class="comment"># True</span></span><br><span class="line">print(sys.getrefcount(a)) <span class="comment"># 3</span></span><br><span class="line">print(sys.getrefcount(b)) <span class="comment"># 3</span></span><br><span class="line">b = <span class="number">1001</span></span><br><span class="line">print(a) <span class="comment"># 1000</span></span><br><span class="line">print(b) <span class="comment"># 1001</span></span><br><span class="line">print(id(a)==id(b)) <span class="comment"># False</span></span><br><span class="line">print(sys.getrefcount(a)) <span class="comment">#2</span></span><br><span class="line">print(sys.getrefcount(b)) <span class="comment"># 2</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 解释：在第2行代码执行后，此时a和b都是指向整数对象1000的引用；在第三行b=1001后，其实是生成了一个新的整数对象1001，然后b又重新指向了这个整数对象（b和新的整数对象1001进行了绑定）</span></span><br><span class="line"><span class="comment"># 可以通过sys.getrefcount()函数和id()函数进行验证</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>程序-算法</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>动态规划</title>
+    <url>/2017/08/15/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/</url>
+    <content><![CDATA[<h3 id="1-题目"><a href="#1-题目" class="headerlink" title="1. 题目"></a>1. 题目</h3><p>   House Robber（一道Leetcode上的关于动态规划的简单题目）具体描述如下：</p>
+<p>   There is a professional robber planning to rob houses along a street. Each house has a certain amount of money stashed, the only constraint stopping you from robbing each of them is that adjacent houses have    security system connected and it will automatically contact the police if two adjacent houses were broken into on the same night. Given a list of non-negative integers representing the amount of money of each     house, determine the maximum amount of money you can rob tonight without alerting the police.</p>
+<a id="more"></a>
+<h3 id="2-题意理解："><a href="#2-题意理解：" class="headerlink" title="2. 题意理解："></a>2. 题意理解：</h3><pre><code>题目描述的意思是假设有一位专业的小偷要对街上一排互相相邻的房间实施偷盗，但没两个相邻的房间之间有安保措施，所以不能对两个相邻的房间同时实施偷盗，不然就会触发报警装置。给定一个数组列表，每个元素代表每间房子中的money的数目，题目要求在不触发警报的前提下，该小偷一次最多能偷多少money?
+</code></pre><p>  这是一道典型的动态规划类型的题目，小偷在一次偷盗过程中有多种实施方案，每个方案的结果（偷得的money数目）不一定一样，目的就是要求出能得到最大数目的方案。假设给定的数组列表如下：</p>
+<p>可以看到总共有10间房子，并且其中每间房子的money数量用黑色字体的数字标示。</p>
+<p><img src="/2017/08/15/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dynamic-propgram.png" alt></p>
+<h3 id="3-算法思路："><a href="#3-算法思路：" class="headerlink" title="3. 算法思路："></a>3. 算法思路：</h3><ul>
+<li>假设小偷偷得顺序是按照从左往右，那么最终停止的位置只能是9或10 </li>
+<li>如果从位置10往前回溯，分别有两个可以选择的房子7和8，位置9也是一样的</li>
+<li>需要选择从左边开始到money数目最大的那个房子，那么可以看到这是一个递归的过程</li>
+<li>因为中间会有一些重复的计算，比如在求位置10的向前回溯的时候，需要计算位置7的money值，计算位置9前溯同样需要计算位置7的money，所以我们需要将已经计算过的值进行记录</li>
+</ul>
+<h3 id="4-程序实例"><a href="#4-程序实例" class="headerlink" title="4. 程序实例　"></a>4. 程序实例　</h3><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;algorithm&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">int</span> <span class="title">rob</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp; nums)</span></span></span><br><span class="line"><span class="function">   </span>&#123;</span><br><span class="line">   <span class="keyword">int</span> len = nums.<span class="built_in">size</span>();</span><br><span class="line">   maxRob.resize(len, <span class="number">-1</span>);</span><br><span class="line">   <span class="keyword">int</span> m1 = robRec(nums, len<span class="number">-1</span>);</span><br><span class="line">   <span class="keyword">int</span> m2 = robRec(nums, len<span class="number">-2</span>);</span><br><span class="line">   <span class="keyword">return</span> m1 &gt; m2?m1:m2;</span><br><span class="line">&#125;</span><br><span class="line">  <span class="function"><span class="keyword">int</span> <span class="title">robRec</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp;nums, <span class="keyword">int</span> pos)</span></span></span><br><span class="line"><span class="function">   </span>&#123;</span><br><span class="line">     <span class="keyword">if</span>(pos &lt; <span class="number">0</span>)</span><br><span class="line">       <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">     <span class="keyword">if</span>(maxRob[pos] &gt;= <span class="number">0</span>)<span class="comment">//判断是否已经计算过当前位置的值</span></span><br><span class="line">      <span class="keyword">return</span> maxRob[pos];</span><br><span class="line">      <span class="keyword">int</span> max1 = robRec(nums, pos<span class="number">-2</span>);</span><br><span class="line">      <span class="keyword">int</span> max2 = robRec(nums, pos<span class="number">-3</span>);</span><br><span class="line">      maxRob[pos] =(max1 &gt; max2?max1:max2) + nums[pos];</span><br><span class="line">      <span class="keyword">return</span> maxRob[pos];</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">     <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; maxRob;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">      <span class="keyword">int</span> arr[] = &#123;<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">1</span>,<span class="number">9</span>	,<span class="number">3</span>	,<span class="number">2</span>,	<span class="number">3</span>,	<span class="number">3</span> ,<span class="number">4</span>&#125;;</span><br><span class="line">      Solution so;</span><br><span class="line">      <span class="function"><span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; <span class="title">int_vec</span><span class="params">(arr, arr+<span class="keyword">sizeof</span>(arr)/<span class="keyword">sizeof</span>(<span class="keyword">int</span>))</span></span>;</span><br><span class="line">     <span class="built_in">cout</span> &lt;&lt; so.rob(int_vec);</span><br><span class="line">      <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>　　　　                                 </p>
+]]></content>
+      <categories>
+        <category>程序-算法</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>卷积神经网络</title>
+    <url>/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/</url>
+    <content><![CDATA[<h1 id="卷积神经网络"><a href="#卷积神经网络" class="headerlink" title="卷积神经网络"></a>卷积神经网络</h1><h2 id="1-卷积神经网络基础-First-Week"><a href="#1-卷积神经网络基础-First-Week" class="headerlink" title="1.  卷积神经网络基础 (First Week)"></a>1.  卷积神经网络基础 (First Week)</h2><ul>
+<li>Understand the convolution operation</li>
+<li>Understand the pooling operation</li>
+<li>Remember the vocabulary used in convolutional neural network (padding, stride, filter, …)</li>
+<li>Build a convolutional neural network for image multi-class classification</li>
+</ul>
+<a id="more"></a>
+<h3 id="1-1-计算机视觉问题"><a href="#1-1-计算机视觉问题" class="headerlink" title="1.1 计算机视觉问题"></a>1.1 计算机视觉问题</h3><html>
+
+    <table style="margin-left: auto; margin-right: auto;">
+        <tr>
+            <td>
+               <img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/计算机视觉.png" height="250" width="350">
+            </td>
+            <td>
+
+​               
+
+- 图像分类
+- 目标检测
+- 图片风格转换
+            </td>
+        </tr>
+    </table>
+</html>
+
+
+<h3 id="1-2-边缘检测（Edge-Dectection）"><a href="#1-2-边缘检测（Edge-Dectection）" class="headerlink" title="1.2 边缘检测（Edge Dectection）"></a>1.2 边缘检测（Edge Dectection）</h3><html>
+    <table style="margin-left: auto; margin-right: auto;">
+        <tr>
+            <td>
+               <img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/垂直边缘检测.png" height="250" width="350"> 
+            </td>
+            <td>
+
+​                           
+
+- 过滤器(filter)也称为卷积核
+- $*$表示卷积操作，大小为6\*6的图片
+- 利用大小为3\*3的卷积核卷积以后得到大小为4\*4的图像
+            </td>
+        </tr>
+    </table>
+</html>
+
+<html>
+    <table style="margin-left: auto; margin-right: auto;">
+        <tr>
+            <td>
+               <img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/垂直和水平边缘检测.png" height="250" width="350"> 
+            </td>
+            <td>
+            垂直和水平边缘检测
+            </td>
+        </tr>
+    </table>
+</html>
+<html>
+    <table style="margin-left: auto; margin-right: auto;">
+        <tr>
+            <td>
+               <img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/学习卷积核.png" height="250" width="350"> 
+            </td>
+            <td>
+            将卷积核中的值当作参数来
+            进行学习
+            </td>
+        </tr>
+    </table>
+</html>
+
+<h3 id="1-3-填充-Padding"><a href="#1-3-填充-Padding" class="headerlink" title="1.3 填充(Padding)"></a>1.3 填充(Padding)</h3><html>
+
+    <table style="margin-left: auto; margin-right: auto;">
+        <tr>
+            <td>
+               <img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/填充.png" height="300" width="450"> 
+            </td>
+            <td>
+
+​            
+
+- 大小为n*n的图片，进过大小为f的卷积核后，图片：(n-f+1)\*(n-f+1)
+- 如果扩展的p=padding，则卷积后的图片：(n+2p-f+1)\*(n+2p-f+1)
+            </td>
+        </tr>
+    </table>
+</html>
+
+<ul>
+<li>填充的原因1:图片做卷积之后会越来越小</li>
+<li>丢失图片角落和四周的信息<h3 id="1-4-Valid-amp-Same-Convolutions"><a href="#1-4-Valid-amp-Same-Convolutions" class="headerlink" title="1.4 Valid &amp; Same Convolutions"></a>1.4 Valid &amp; Same Convolutions</h3></li>
+<li><strong>Valid Convolution:</strong> 不进行padding，即<script type="math/tex">n \times n * f \times f->n-f+1 \times n-f+1</script>。<br>例如：<script type="math/tex">6 \times 6 * 3\times3->4\times4</script></li>
+<li><strong>Same Convolution:</strong> 通过Padding的方式控制卷积输出的图像大小和输入的图像大小一样。即：$n = n+2p-f+1=&gt;p=\frac{f-1}{2}(f的值通常是奇数)$ </li>
+</ul>
+<h3 id="1-5-Strided-Convolution-带步长的卷积"><a href="#1-5-Strided-Convolution-带步长的卷积" class="headerlink" title="1.5 Strided Convolution(带步长的卷积)"></a>1.5 Strided Convolution(带步长的卷积)</h3><p>图像：</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>2</th>
+<th>3</th>
+<th>7</th>
+<th>4</th>
+<th>6</th>
+<th>2</th>
+<th>9</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6</td>
+<td>6</td>
+<td>9</td>
+<td>8</td>
+<td>7</td>
+<td>4</td>
+<td>3</td>
+</tr>
+<tr>
+<td>3</td>
+<td>4</td>
+<td>8</td>
+<td>3</td>
+<td>8</td>
+<td>9</td>
+<td>7</td>
+</tr>
+<tr>
+<td>7</td>
+<td>8</td>
+<td>3</td>
+<td>6</td>
+<td>6</td>
+<td>3</td>
+<td>4</td>
+</tr>
+<tr>
+<td>4</td>
+<td>2</td>
+<td>1</td>
+<td>8</td>
+<td>3</td>
+<td>4</td>
+<td>6</td>
+</tr>
+<tr>
+<td>3</td>
+<td>2</td>
+<td>4</td>
+<td>1</td>
+<td>9</td>
+<td>8</td>
+<td>3</td>
+</tr>
+<tr>
+<td>0</td>
+<td>1</td>
+<td>3</td>
+<td>9</td>
+<td>2</td>
+<td>1</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>卷积核：</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>3</th>
+<th>4</th>
+<th>4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>0</td>
+<td>2</td>
+</tr>
+<tr>
+<td>-1</td>
+<td>0</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>（Stride=2）卷积后结果：</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>91</th>
+<th>100</th>
+<th>83</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>64</td>
+<td>91</td>
+<td>127</td>
+</tr>
+<tr>
+<td>44</td>
+<td>72</td>
+<td>74</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>公式：</strong>大小为$n\times n$的图像，过滤器大小为$f\times f$，Padding大小为$p$，步长大小为$s$。卷积后的图像大小为：$\lfloor\frac{n+2p-f}{s}+1\rfloor\times\lfloor\frac{n+2p-f}{s}+1\rfloor (\lfloor \rfloor表示取下界)$</p>
+<h3 id="1-6-Convolutions-Over-Volume"><a href="#1-6-Convolutions-Over-Volume" class="headerlink" title="1.6 Convolutions Over Volume"></a>1.6 Convolutions Over Volume</h3><h4 id="1-6-1-Convolution-on-RGB-channal-and-Multiple-filters"><a href="#1-6-1-Convolution-on-RGB-channal-and-Multiple-filters" class="headerlink" title="1.6.1 Convolution on RGB channal and Multiple filters"></a>1.6.1 Convolution on RGB channal and Multiple filters</h4><html>
+    <table style="margin-left: auto; margin-right: auto;">
+        <tr>
+            <td>
+               <img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/Convolution on RGB channal.png" height="300" width="450"> 
+            </td>
+            <td>
+   <img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/multiple filters.png" height="300" width="450">
+            </td>
+        </tr>
+    </table>
+</html>
+
+<h3 id="1-7-一层卷积神经网络"><a href="#1-7-一层卷积神经网络" class="headerlink" title="1.7 一层卷积神经网络"></a>1.7 一层卷积神经网络</h3><h4 id="1-7-1-一层卷积神经网络示例"><a href="#1-7-1-一层卷积神经网络示例" class="headerlink" title="1.7.1 一层卷积神经网络示例"></a>1.7.1 一层卷积神经网络示例</h4><p><img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/Example of One Layer Convolutional Network.png" height="300" width="450"></p>
+<ul>
+<li>一层卷积神经网络相当于线性变换：$Z^{[1]} = W^{[1]}*X+b^{[1]}, a^{[1]}=g(Z^{[1]})$。</li>
+<li>假设有10个卷积核，每个大小为3x3x3。那么，一层卷积网络的参数的个数：<ul>
+<li>1个卷积核的参数个数：w(3x3x3)+b(1) = 28</li>
+<li>10个卷积核的参数总个数：10x28 = 280</li>
+</ul>
+</li>
+</ul>
+<h4 id="1-7-2-卷积网络符号标记总结"><a href="#1-7-2-卷积网络符号标记总结" class="headerlink" title="1.7.2 卷积网络符号标记总结"></a>1.7.2 卷积网络符号标记总结</h4><ul>
+<li>$f^{[l]}$ 卷积核的大小</li>
+<li>$p^{[l]}$ padding大小</li>
+<li>$s^{[l]}$ 步长的大小</li>
+<li>$n_c^{[l]}$ 卷积核的数量</li>
+<li>Input:  $n_{h}^{[l-1]}\times n_{w}^{[l-1]}\times n_{c}^{[l-1]} $</li>
+<li>Output:  $n_{h}^{[l]}\times n_{w}^{[l]}\times n_{c}^{[l]} $</li>
+<li>每个卷积核的大小：$f^{[l]}\times f^{[l]}\times n^{[l-1]}$</li>
+<li>激活值变量：$ a^{[l]}-&gt;n_{H}^{[l]}\times n_{W}^{[l]}\times n_{c}^{[l]}$</li>
+<li>权重参数：$f^{[l]}\times f^{[l]}\times n^{[l-1]}_{c}\times n^{[l]}_{c}$</li>
+<li>偏置参数：$n_{c}^{[l]}$</li>
+<li>第$l$层的输入：$A^{[l-1]}=(m\times n_{h}^{[l-1]}\times n_{w}^{[l-1]}\times n_{c}^{[l-1]})$</li>
+<li>第$l$层输出：$A^{[l]} = (m\times n_{H}^{[l]}\times n_{W}^{[l]}\times n^{[l]}_{c})$</li>
+</ul>
+<h3 id="1-8-简单卷积神经网络示例"><a href="#1-8-简单卷积神经网络示例" class="headerlink" title="1.8 简单卷积神经网络示例"></a>1.8 简单卷积神经网络示例</h3><h4 id="1-8-1-一般的卷积网络的数据变化流图"><a href="#1-8-1-一般的卷积网络的数据变化流图" class="headerlink" title="1.8.1 一般的卷积网络的数据变化流图"></a>1.8.1 一般的卷积网络的数据变化流图</h4><p><img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/ConvNet示例.png" height="300" width="450"> <br><br>&nbsp; &nbsp;如图所示的卷积神经网络，包含有3个卷积层1个全连接层。各个层的输入，输出和参数分别是：</p>
+<ul>
+<li>输入层：$X=A^{[0]}=(n^{[0]}_{H}=n^{[0]}_{H}=39,n^{[0]}=3)$</li>
+<li>第一层卷积：$f^{[1]}=3,s^{[1]}=1,p^{[1]}=0, #filters=10$</li>
+<li>第一层输出：$A^{[1]}=(n^{[1]}_{H}=n^{[1]}_{W}=37,n^{[1]}=10)$</li>
+<li>第二层卷积：$f^{[2]}=5,s^{[2]}=2,p^{[2]}=0, #filters=20$</li>
+<li>第二层输出：$A^{[2]}=(n^{[2]}_{H}=n^{[2]}_{W}=17,n^{[2]}=20)$</li>
+<li>第三层卷积：$f^{[3]}=5,s^{[3]}=2,p^{[3]}=0, #filters=40$</li>
+<li>第三层输出：$A^{[3]}=(n^{[3]}_{H}=n^{[3]}_{W}=7,n^{[2]}=40)$</li>
+<li>把第三层的输出展平：$A^{[3]}_{flatt}=7\times7\times40=1906$</li>
+<li>最后一层通过句子$W=(1,1960),b=(1,1)加权输出，即：\hat{y} = sigmoid(W*A^{[3]}_{flatt}+b)$</li>
+</ul>
+<h4 id="1-8-2卷积网络中的层的类型"><a href="#1-8-2卷积网络中的层的类型" class="headerlink" title="1.8.2卷积网络中的层的类型"></a>1.8.2卷积网络中的层的类型</h4><ul>
+<li>Convolution</li>
+<li>Pooling</li>
+<li>Fully Connected</li>
+</ul>
+<h3 id="1-9-Pooling-Layers-池化层"><a href="#1-9-Pooling-Layers-池化层" class="headerlink" title="1.9 Pooling Layers(池化层)"></a>1.9 Pooling Layers(池化层)</h3><h5 id="1-9-1-Max-Pooling"><a href="#1-9-1-Max-Pooling" class="headerlink" title="1.9.1 Max Pooling"></a>1.9.1 Max Pooling</h5><html>
+    <table style="margin-left: auto; margin-right: auto;">
+        <tr>
+            <td>
+               <img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/Max Pooling1.png" height="300" width="450"> <br>
+            </td>
+            <td>
+   <img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/Max Pooling2.png" height="300" width="450"> <br>
+            </td>
+        </tr>
+    </table>
+</html>
+
+<ul>
+<li>选择区域范围内的最大值</li>
+<li>超参数：<ul>
+<li>$f:$    过滤器的大小</li>
+<li>$s:$ 步长的大小</li>
+</ul>
+</li>
+<li>没有参数</li>
+</ul>
+<h5 id="1-9-1-Avarage-Pooling"><a href="#1-9-1-Avarage-Pooling" class="headerlink" title="1.9.1 Avarage Pooling"></a>1.9.1 Avarage Pooling</h5><p> <img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/Avarage Pooling.png" height="300" width="450"> <br></p>
+<h5 id="1-9-3-Pooling-总结"><a href="#1-9-3-Pooling-总结" class="headerlink" title="1.9.3 Pooling 总结"></a>1.9.3 Pooling 总结</h5><ul>
+<li>HypterParamters:<ul>
+<li>f: filter size</li>
+<li>s: stride</li>
+<li>Max or avarage Pooling </li>
+</ul>
+</li>
+<li>没有需要学习的参数</li>
+</ul>
+<h3 id="1-10-CNN-convolutional-Neural-Network-完整结构"><a href="#1-10-CNN-convolutional-Neural-Network-完整结构" class="headerlink" title="1.10 CNN(convolutional Neural Network)完整结构"></a>1.10 CNN(convolutional Neural Network)完整结构</h3><p><img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/CNN.png" height="300" width="450"> <br></p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>&nbsp;</th>
+<th>Activation shape</th>
+<th>Activation size</th>
+<th>#paramters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Input:</td>
+<td>(32,32,3)</td>
+<td>3072</td>
+<td>0</td>
+</tr>
+<tr>
+<td>CONV1(f=5,s=1)</td>
+<td>(28,28,6)</td>
+<td>6272</td>
+<td>208</td>
+</tr>
+<tr>
+<td>POOL1</td>
+<td>(14,14,8)</td>
+<td>1568</td>
+<td>0</td>
+</tr>
+<tr>
+<td>CONV2(f=5,s1)</td>
+<td>(10,10,16)</td>
+<td>1600</td>
+<td>416</td>
+</tr>
+<tr>
+<td>POOL2</td>
+<td>(5,5,16)</td>
+<td>400</td>
+<td>0</td>
+</tr>
+<tr>
+<td>FC3</td>
+<td>(120,1)</td>
+<td>120</td>
+<td>48001</td>
+</tr>
+<tr>
+<td>FC4</td>
+<td>(84,1)</td>
+<td>84</td>
+<td>10081</td>
+</tr>
+<tr>
+<td>Softmax</td>
+<td>(10,1)</td>
+<td>10</td>
+<td>851</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="1-11-使用卷网络的优点"><a href="#1-11-使用卷网络的优点" class="headerlink" title="1.11 使用卷网络的优点"></a>1.11 使用卷网络的优点</h3><p><img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/Why Convlutional.png" height="300" width="450"> <br></p>
+<p><img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/Putting it all togethoer.png" height="300" width="450"> <br></p>
+<h2 id="2-深度卷积模型-case-studies-Second-Week"><a href="#2-深度卷积模型-case-studies-Second-Week" class="headerlink" title="2. 深度卷积模型:case studies (Second Week)"></a>2. 深度卷积模型:case studies (Second Week)</h2><h3 id="2-1-经典的网络模型"><a href="#2-1-经典的网络模型" class="headerlink" title="2.1 经典的网络模型"></a>2.1 经典的网络模型</h3><p><strong>LeNet-5:</strong></p>
+<p><img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/LeNet-5.png" height="300" width="450"> <br></p>
+<p><strong>AlexNet:</strong></p>
+<p><img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/AlexNet.png" height="300" width="450"> <br></p>
+<p><strong>VGG-16:</strong></p>
+<p><img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/VGG-16.png" height="300" width="450"> <br></p>
+<h3 id="2-2-残差网络"><a href="#2-2-残差网络" class="headerlink" title="2.2 残差网络"></a>2.2 残差网络</h3><h4 id="2-2-1-残差网络的结构"><a href="#2-2-1-残差网络的结构" class="headerlink" title="2.2.1 残差网络的结构"></a>2.2.1 残差网络的结构</h4><p><img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/ResNet.png" height="300" width="450"> <br></p>
+<ul>
+<li>深层网络结构中，残差网络能够提高网络训练的准确率</li>
+</ul>
+<h4 id="2-2-2-残差网络为什么有效"><a href="#2-2-2-残差网络为什么有效" class="headerlink" title="2.2.2 残差网络为什么有效"></a>2.2.2 残差网络为什么有效</h4><p><img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/why res-Net work well.png" height="300" width="450"> <br></p>
+<h3 id="2-3-Networks-in-networks-and-1x1-convolutions"><a href="#2-3-Networks-in-networks-and-1x1-convolutions" class="headerlink" title="2.3 Networks in networks and 1x1 convolutions"></a>2.3 Networks in networks and 1x1 convolutions</h3><p><img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/1x1 convolution.png" height="300" width="450"> <br><br><img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/using 1x1 convolution.png" height="300" width="450"></p>
+<h3 id="2-4-Inception-Network"><a href="#2-4-Inception-Network" class="headerlink" title="2.4 Inception Network"></a>2.4 Inception Network</h3><p><img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/inception-net motiation.png" height="300" width="450"> <br><br><img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/Problem of inception network.png" height="300" width="450"> <br><br><img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/solution of inception net.png" height="300" width="450"> <br></p>
+<h3 id="2-5-Incption-Network-Module"><a href="#2-5-Incption-Network-Module" class="headerlink" title="2.5 Incption Network Module"></a>2.5 Incption Network Module</h3><p><img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/inception network module.png" height="300" width="450"> <br></p>
+<h3 id="2-6-Practical-advice-for-using-ConvNets"><a href="#2-6-Practical-advice-for-using-ConvNets" class="headerlink" title="2.6 Practical advice for using ConvNets"></a>2.6 Practical advice for using ConvNets</h3><p><strong>Using open souce implemetation, eg. github</strong></p>
+<h3 id="2-7-Transfer-learning"><a href="#2-7-Transfer-learning" class="headerlink" title="2.7 Transfer learning"></a>2.7 Transfer learning</h3><p><img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/transfer learning.png" height="300" width="450"> <br></p>
+<h3 id="2-7-Data-augmentation"><a href="#2-7-Data-augmentation" class="headerlink" title="2.7 Data augmentation"></a>2.7 Data augmentation</h3><p><img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/data agumentation.png" height="300" width="550"> <br><br><img src="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/color shifting.png" height="300" width="550"> <br></p>
+]]></content>
+      <categories>
+        <category>深度学习</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>单例模式</title>
+    <url>/2017/03/01/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/</url>
+    <content><![CDATA[<p>一、单利模式：就是只有一个实例。</p>
+<p>singleton pattern单例模式：确保某一个类在程序运行中只能生产一个实例，并提供一个访问它的全局访问点。这个类称为单例类。如一个工程中，数据库访问对象只有一个，电脑的鼠标只能连接一个，操作系统只能有一个窗口管理器，这是可以考虑使用单利模式。</p>
+<a id="more"></a>
+<p>众所周知，C++类中，类对象被创建时，编译系统为对象分配内存空间，并自动调用构造函数，由构造函数完成成员的初始话工作，也就是说使用构造函数来初始化对象。</p>
+<p>1、那么我么需要把构造函数设置成私有的private，这样可以禁止别人使用构造函数创建其他的实例。</p>
+<p>2、又单例类要一直向系统提供这个实例，那么，需要声明它为静态的实例成员，在需要的时候，才创建该实例。</p>
+<p>3、且应该把这个静态成员设置为 null，在一个public 的方法里去判断，只有在静态实例成员为 null，也就是没有被初始化的时候，才去初始化它，且只被初始化一次。</p>
+<p>二、代码示例</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton</span>（懒汉模式）</span></span><br><span class="line"><span class="class"> </span>&#123;</span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">　　Singleton()&#123;&#125;</span><br><span class="line">　　<span class="keyword">static</span> Singleton* singleton;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">　　<span class="keyword">static</span> Singleton* getInstance()&#123;</span><br><span class="line">　　　<span class="keyword">if</span>(singleton == NULL)</span><br><span class="line">    singleton = <span class="keyword">new</span> Singleton();</span><br><span class="line">    <span class="keyword">return</span> singleton;</span><br><span class="line"></span><br><span class="line"> &#125;;</span><br><span class="line"></span><br><span class="line"> Singleton* Singleton::singleton = NULL;</span><br><span class="line"> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span>（饿汉模式）线程安全的，因为所有类共享一个静态变量的实例</span></span><br><span class="line"><span class="class"> </span>&#123;</span><br><span class="line">  <span class="keyword">private</span>:</span><br><span class="line">   Singleton()&#123;&#125;</span><br><span class="line">   <span class="keyword">static</span> Singleton* singleton;</span><br><span class="line">  <span class="keyword">public</span>:</span><br><span class="line">   <span class="keyword">static</span> Singleton* getInstance()&#123;</span><br><span class="line"> <span class="keyword">return</span> singleton;</span><br><span class="line"> &#125;;</span><br><span class="line">Singleton* Singleton::singleton = <span class="keyword">new</span> Singleton();</span><br></pre></td></tr></table></figure>
+<p>这是一个很棒的实现，简单易懂。但是这是一个完美的实现吗？不！该方法是线程不安全的。考虑两个线程同时首次调用instance方法且同时检测到p是NULL值，则两个线程会同时构造一个实例p，这是严重的错误！同时，这也是不是单例的唯一实现！</p>
+<p>三、懒汉与饿汉</p>
+<p>单例模式大约有两种实现方式：懒汉与饿汉</p>
+<p>懒汉：顾名思义，不到万不得已就不会去实例化类，也就是说在第一次用到类实例的时候才回</p>
+<p>去实例化，所以上面的经典方法被归为懒汉实现，以时间换空间。</p>
+<p>饿汉：饿了肯定要饥不择食。所以单例类定义的时候就进行实例化，以空间换时间。</p>
+<p>四、线程安全的懒汉实现</p>
+<p> 加锁的经典懒汉实现：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">singleton</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">   singleton()&#123;</span><br><span class="line">  pthread_mutex_init(&amp;mutex);</span><br><span class="line">   &#125;</span><br><span class="line"> <span class="keyword">static</span> singleton *p;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">　　<span class="keyword">static</span> pthread_mutex_t mutex;</span><br><span class="line">　　<span class="keyword">static</span> singleton *initance();</span><br><span class="line">&#125;</span><br><span class="line">singleton* singleton::p = NULL;</span><br><span class="line">singleton* singleton::initance() &#123; <span class="keyword">if</span> (p == NULL) &#123; pthread_mutex_lock(&amp;mutex); <span class="keyword">if</span> (p == NULL) p = <span class="keyword">new</span> singleton(); pthread_mutex_unlock(&amp;mutex); &#125; <span class="keyword">return</span> p; &#125;</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>程序-算法</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>循环神经网络</title>
+    <url>/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/</url>
+    <content><![CDATA[<h1 id><a href="#" class="headerlink" title=" "></a> </h1><h1 id="序列模型-循环神经网络"><a href="#序列模型-循环神经网络" class="headerlink" title="序列模型-循环神经网络"></a>序列模型-循环神经网络</h1><h2 id="1-序列数据场景"><a href="#1-序列数据场景" class="headerlink" title="1.序列数据场景"></a>1.序列数据场景</h2><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/example of seq datq.png" height="300" width="450"> </p>
+<h2 id="2-Notation-符号标记）"><a href="#2-Notation-符号标记）" class="headerlink" title="2. Notation(符号标记）"></a>2. Notation(符号标记）</h2><h3 id="2-1-Motivating-example"><a href="#2-1-Motivating-example" class="headerlink" title="2.1 Motivating example"></a>2.1 Motivating example</h3><ul>
+<li>x: Harray potter and Hermione Granger invented a new spell.<br><br>-&gt; <script type="math/tex">x^{<1>}   x^{<2>} .... x^{<t>}... x^{<9>}</script></li>
+<li>y: 1 &nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;&nbsp;1…&nbsp;&nbsp;0&nbsp;&nbsp;0<br><br>-&gt;$y^{<1>}$ $y^{<2>}$ $y^{<3>}$…<script type="math/tex">y^{<t>}</script>…<script type="math/tex">y^{<9>}</script></3></2></1></li>
+<li><script type="math/tex">X^{(i)<t>}</script>:代表第i个样本输入X的第t个序列值</li>
+<li><script type="math/tex">y^{(i)<t>}</script>:代表第i个样本输出y的第t个序列值</li>
+<li><script type="math/tex">T_{x}^{i}</script>:代表第t个样本的X的长度$T_{x}^{i}$=9</li>
+<li><script type="math/tex">T_{y}^{i}</script>:代表第t个样本的y的长度$T_{x}^{i}$=9</li>
+</ul>
+<a id="more"></a>
+<h3 id="2-2-单词的表示"><a href="#2-2-单词的表示" class="headerlink" title="2.2 单词的表示"></a>2.2 单词的表示</h3><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/represent words.png " height="300" width="450"> </p>
+<ul>
+<li>对于词表中为能出现的词，一般用$<unk>$标记来表示</unk></li>
+</ul>
+<h2 id="3-Recurent-Neural-Networks-循环神经网络"><a href="#3-Recurent-Neural-Networks-循环神经网络" class="headerlink" title="3 Recurent Neural Networks(循环神经网络)"></a>3 Recurent Neural Networks(循环神经网络)</h2><h3 id="3-1-标准的全连接接网络为什么不能够用于序列数据的处理："><a href="#3-1-标准的全连接接网络为什么不能够用于序列数据的处理：" class="headerlink" title="3.1 标准的全连接接网络为什么不能够用于序列数据的处理："></a>3.1 标准的全连接接网络为什么不能够用于序列数据的处理：</h3><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/standard neural network.png" height="300" width="450"></p>
+<h3 id="3-2-循环神经网络基本结构"><a href="#3-2-循环神经网络基本结构" class="headerlink" title="3.2 循环神经网络基本结构"></a>3.2 循环神经网络基本结构</h3><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/recurent neural networks.png" height="300" width="450"></p>
+<h3 id="3-3-循环神经网络的前向传播"><a href="#3-3-循环神经网络的前向传播" class="headerlink" title="3.3 循环神经网络的前向传播"></a>3.3 循环神经网络的前向传播</h3><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/rnn forwar propagation.png" height="300" width="450"><br><br><strong>（1）参数符号：</strong></p>
+<ul>
+<li>$W_{aa}$:隐藏层向量的矩阵参数</li>
+<li>$W_{ax}$:t时刻输入层的矩阵参数</li>
+<li>$W_{ay}$:表示输出层的计算矩阵参数</li>
+<li><script type="math/tex; mode=display">a^{<t>}$$:表示t时刻隐藏层的激活输出，计算公式：
+
+  -</script><pre><code>a^{&lt;t&gt;}=g(W_{aa}*a^{&lt;t-1&gt;}+W_{ax}*x^{&lt;t&gt;}+b_a)​
+$$
+</code></pre></li>
+</ul>
+<ul>
+<li><p>$y^{<t>}$:表示t时刻输出层的激活输出，计算公式：</t></p>
+<ul>
+<li><script type="math/tex; mode=display">
+y^{<t>} = g(W_{ya}a^{<t>}+b_{y})</script></li>
+</ul>
+</li>
+</ul>
+<p><strong>（2）简化的RNN参数形式：</strong></p>
+<ul>
+<li><script type="math/tex; mode=display">
+     a^{<t>} = g(W_{aa}a^{<t-1>}+W_{ax}x^{<t>}+b_a)
+         ​=g(W_a[a^{<t-1>};x^{<t>}]+b_a)​</script></li>
+</ul>
+<ul>
+<li>$W_{a} = [Waa;Wax]$</li>
+</ul>
+<h3 id="3-4-前向传播和反向传播"><a href="#3-4-前向传播和反向传播" class="headerlink" title="3.4 前向传播和反向传播"></a>3.4 前向传播和反向传播</h3><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/forward_backward_propagation.png" height="300" width="450"><br></p>
+<script type="math/tex; mode=display">L(\hat{y} ,y) = \sum^{T_y}_{t=1}L(\hat{y}^{t}y^{t}) = \sum^{T_y}_{t=1}[-y^{t}log\hat{y}^t-(1-y^t)log(1-y^{t})]</script><h3 id="3-5-循环神经网络的类型"><a href="#3-5-循环神经网络的类型" class="headerlink" title="3.5 循环神经网络的类型"></a>3.5 循环神经网络的类型</h3><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/rnn types.png" height="300" width="450"><br></p>
+<h2 id="4-Language-Model-and-Sequence-Generation"><a href="#4-Language-Model-and-Sequence-Generation" class="headerlink" title="4. Language Model and Sequence Generation"></a>4. Language Model and Sequence Generation</h2><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/language model.png" height="300" width="450"><br></p>
+<h2 id="5-Vanishing-gradients-with-RNNs"><a href="#5-Vanishing-gradients-with-RNNs" class="headerlink" title="5. Vanishing gradients with RNNs"></a>5. Vanishing gradients with RNNs</h2><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/vanishing gradients.png" height="300" width="450"><br></p>
+<h3 id="深度网络梯度反向传播的过程存在的问题："><a href="#深度网络梯度反向传播的过程存在的问题：" class="headerlink" title="深度网络梯度反向传播的过程存在的问题："></a>深度网络梯度反向传播的过程存在的问题：</h3><ul>
+<li>梯度爆炸：gradient clipping（参数值通常会Nan,overflow)</li>
+<li>梯度消失</li>
+</ul>
+<h2 id="6-GRU-门控循环单元"><a href="#6-GRU-门控循环单元" class="headerlink" title="6. GRU 门控循环单元"></a>6. GRU 门控循环单元</h2><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/GRU.png" height="300" width="450"><br></p>
+<h2 id="7-LSTM"><a href="#7-LSTM" class="headerlink" title="7. LSTM"></a>7. LSTM</h2><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/lstm.png" height="300" width="450"><br></p>
+<h1 id="序列模型-自然语言处理-第二周"><a href="#序列模型-自然语言处理-第二周" class="headerlink" title=" 序列模型-自然语言处理(第二周)"></a><center> 序列模型-自然语言处理(第二周)</center></h1><h2 id="1-word-representation"><a href="#1-word-representation" class="headerlink" title="1. word representation"></a>1. word representation</h2><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/one hot word representation.png" height="300" width="450"><br></p>
+<h3 id="1-1-One-hot-编码表示缺点"><a href="#1-1-One-hot-编码表示缺点" class="headerlink" title="1.1 One-hot 编码表示缺点"></a>1.1 One-hot 编码表示缺点</h3><ul>
+<li>稀疏</li>
+<li>语义鸿沟</li>
+</ul>
+<h3 id="1-2-Word-Embedding"><a href="#1-2-Word-Embedding" class="headerlink" title="1.2  Word Embedding"></a>1.2  Word Embedding</h3><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/word embedding.png" height="300" width="450"><br></p>
+<h3 id="1-3-Transfer-learning-using-word-embedding"><a href="#1-3-Transfer-learning-using-word-embedding" class="headerlink" title="1.3 Transfer learning using word embedding"></a>1.3 Transfer learning using word embedding</h3><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/transfer learning using word embedding.png" height="300" width="450"><br></p>
+<h3 id="1-4-Properties-of-word-embeddings"><a href="#1-4-Properties-of-word-embeddings" class="headerlink" title="1.4 Properties of word embeddings"></a>1.4 Properties of word embeddings</h3><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/properties of word embeddings.png" height="300" width="450"><br></p>
+<h3 id="1-5-Embedding-matrix"><a href="#1-5-Embedding-matrix" class="headerlink" title="1.5 Embedding matrix"></a>1.5 Embedding matrix</h3><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/embedding matrix.png" height="300" width="450"><br></p>
+<ul>
+<li>实际的编程过程中，通常不会用矩阵乘法实现 $e_{i} = E*o_{i}$，而是用lookup函数查找进行实现。</li>
+</ul>
+<h2 id="2-Sentiment-classification"><a href="#2-Sentiment-classification" class="headerlink" title="2. Sentiment classification"></a>2. Sentiment classification</h2><h3 id="2-1-Simple-sentiment-classification"><a href="#2-1-Simple-sentiment-classification" class="headerlink" title="2.1 Simple sentiment classification"></a>2.1 Simple sentiment classification</h3><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/simple sentiment classification.png" height="300" width="450"><br></p>
+<h3 id="2-2-RNN-for-sentiment-calssification"><a href="#2-2-RNN-for-sentiment-calssification" class="headerlink" title="2.2 RNN for sentiment calssification"></a>2.2 RNN for sentiment calssification</h3><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/rnn for sentiment classification.png" height="300" width="450"><br></p>
+<h1 id="序列模型-自然语言处理-第三周"><a href="#序列模型-自然语言处理-第三周" class="headerlink" title=" 序列模型-自然语言处理(第三周)"></a><center> 序列模型-自然语言处理(第三周)</center></h1><h2 id="1-Sequence-to-Sequence-model"><a href="#1-Sequence-to-Sequence-model" class="headerlink" title="1 Sequence to Sequence model"></a>1 Sequence to Sequence model</h2><h3 id="1-1-Seq-to-Seq-machine-translation"><a href="#1-1-Seq-to-Seq-machine-translation" class="headerlink" title="1.1 Seq to Seq (machine translation)"></a>1.1 Seq to Seq (machine translation)</h3><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/seq to seq model.png" height="300" width="450"><br></p>
+<h3 id="1-2-Image-to-sequence-图像内容识别"><a href="#1-2-Image-to-sequence-图像内容识别" class="headerlink" title="1.2 Image to sequence(图像内容识别)"></a>1.2 Image to sequence(图像内容识别)</h3><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/image caption.png" height="300" width="450"><br></p>
+<h2 id="2-2-Machine-translation"><a href="#2-2-Machine-translation" class="headerlink" title="2.2 Machine translation"></a>2.2 Machine translation</h2><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/machine translation.png" height="300" width="450"><br></p>
+<ul>
+<li>机器翻译和语言模型类似，它是在构建一个条件语言模型；</li>
+<li>语言模型在随机生成一个最大概率的句子，根据对前一个时刻t的随机采样，生成的句子概率最大化；</li>
+<li>机器翻译是先对输入的句子（源语言）利用循环神经网络进行编码，然后将编码后的向量作为输入到解码器中进行解码；</li>
+<li>解码的过程并没有根据概率分布，随机选择生成一个概率最大的句子，并不是最有可能的句子；</li>
+<li>语言模型：$P(y^{(1)},y^{(2)},…,y^{(T_y)})$；</li>
+<li>机器翻译：$(y^{(1)},y^{(2)},…,y^{(T_y)}|x^{(1)},x^{(2)},…,x^{(T_x)})$；</li>
+<li>如果按照语言模型对机器翻译进行解码，则生成的翻译句子可能并不是输入句子的最合适的翻译；</li>
+</ul>
+<h3 id="2-2-1-Greedy-Search"><a href="#2-2-1-Greedy-Search" class="headerlink" title="2.2.1 Greedy Search"></a>2.2.1 Greedy Search</h3><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/greedy search.png" height="300" width="450"><br></p>
+<h3 id="2-2-2-Beam-Search"><a href="#2-2-2-Beam-Search" class="headerlink" title="2.2.2 Beam Search"></a>2.2.2 Beam Search</h3><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/beam search.png" height="300" width="450"><br></p>
+<ul>
+<li>Beam search 是一个在解码阶段的近似搜索算法，设置beam_size = k</li>
+<li>第一步，第一个输出，通过选择概率排在最前面的k个候选，作为下一个时刻的输入</li>
+<li>第二步，前面每个单词都会输出一个大小为v的概率分布，然后第一个词的概率乘以第二个词的概率</li>
+<li>$P(y^{<1>},y^{<2>}|x) = P(y^{<1>}|x)*P(y^{<2>}|x,y^{<1>})$</1></2></1></2></1></li>
+</ul>
+<h3 id="2-2-3-Beam-Search-Length-Normal"><a href="#2-2-3-Beam-Search-Length-Normal" class="headerlink" title="2.2.3 Beam Search Length Normal"></a>2.2.3 Beam Search Length Normal</h3><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/beam_search_length_norm.png" height="300" width="450"><br></p>
+<ul>
+<li>原始的方法：若干个概率小于1的值相乘，就会得到越来越小的值，计算机存储会溢出。取对数则会避免这个问题</li>
+<li>长度归一化：通过对长度进行归一化，就能够避免解码过程中更趋向于选择长度较短的句子</li>
+</ul>
+<h3 id="2-2-4-Error-analysis-in-beam-search"><a href="#2-2-4-Error-analysis-in-beam-search" class="headerlink" title="2.2.4 Error analysis in beam search"></a>2.2.4 Error analysis in beam search</h3><p><img src="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/error analysis in beam search.png" height="300" width="450"><br></p>
+]]></content>
+      <categories>
+        <category>深度学习</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>梯度检查</title>
+    <url>/2019/09/21/%E6%A2%AF%E5%BA%A6%E6%A3%80%E6%9F%A5%20/</url>
+    <content><![CDATA[<h1 id="梯度检查"><a href="#梯度检查" class="headerlink" title=" 梯度检查 "></a><center> 梯度检查 </center></h1><h2 id="1-如何实现梯度检查"><a href="#1-如何实现梯度检查" class="headerlink" title="1. 如何实现梯度检查"></a>1. 如何实现梯度检查</h2><p>&nbsp; &nbsp; 反向传播就是计算$\frac{\partial{J}}{\partial{\theta}}$，其中$\theta$表示代价函数$J$的参数。$J$可以通过前向传播和计算代价函数的公式进行计算。梯度的计算公式：<br><br>$\frac{\partial J}{\partial \theta} = \lim_{\varepsilon \to 0} \frac{J(\theta + \varepsilon) - J(\theta - \varepsilon)}{2 \varepsilon} \tag{1}$ </p>
+<h3 id="1-1-需要确认的需求："><a href="#1-1-需要确认的需求：" class="headerlink" title="1.1 需要确认的需求："></a>1.1 需要确认的需求：</h3><ul>
+<li>确认$\frac{\partial J}{\partial \theta}$的计算是否正确</li>
+<li>可以通过计算$J(\theta+\epsilon)-J(\theta-\epsilon)(\theta是常数)$</li>
+<li>利用公式$(1)$和一个非常小的$\epsilon$校验$\frac{\partial J}{\partial \theta}$是否计算正确</li>
+</ul>
+<h3 id="1-2-为了校验反向传播是否正确计算了-frac-partial-J-partial-theta-，步骤如下："><a href="#1-2-为了校验反向传播是否正确计算了-frac-partial-J-partial-theta-，步骤如下：" class="headerlink" title="1.2 为了校验反向传播是否正确计算了$\frac{\partial J}{\partial \theta}$，步骤如下："></a>1.2 为了校验反向传播是否正确计算了$\frac{\partial J}{\partial \theta}$，步骤如下：</h3><ul>
+<li>First compute “gradapprox” using the formula above (1) and a small value of $\varepsilon$. Here are the Steps to follow:<ol>
+<li>$\theta^{+} = \theta + \varepsilon$</li>
+<li>$\theta^{-} = \theta - \varepsilon$</li>
+<li>$J^{+} = J(\theta^{+})$</li>
+<li>$J^{-} = J(\theta^{-})$</li>
+<li>$gradapprox = \frac{J^{+} - J^{-}}{2  \varepsilon}$</li>
+</ol>
+</li>
+<li>Then compute the gradient using backward propagation, and store the result in a variable “grad” </li>
+<li>Finally, compute the relative difference between “gradapprox” and the “grad” using the following formula:<script type="math/tex; mode=display">difference = \frac {\mid\mid grad - gradapprox \mid\mid_2}{\mid\mid grad \mid\mid_2 + \mid\mid gradapprox \mid\mid_2} \tag{2}</script>You will need 3 Steps to compute this formula:<ul>
+<li>1’. compute the numerator using np.linalg.norm(…)<ul>
+<li>2’. compute the denominator. You will need to call np.linalg.norm(…) twice.</li>
+<li>3’. divide them.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>If this difference is small (say less than $10^{-7}$), you can be quite confident that you have computed your gradient correctly. Otherwise, there may be a mistake in the gradient computation. </li>
+</ul>
+]]></content>
+      <categories>
+        <category>深度学习</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>文本相似度计算</title>
+    <url>/2017/09/30/%E6%96%87%E6%9C%AC%E7%9B%B8%E4%BC%BC%E5%BA%A6%E8%AE%A1%E7%AE%97/</url>
+    <content><![CDATA[<h3 id="1-文本相似度计算的三个阶段"><a href="#1-文本相似度计算的三个阶段" class="headerlink" title="1. 文本相似度计算的三个阶段"></a>1. 文本相似度计算的三个阶段</h3><ul>
+<li>字面的匹配相似</li>
+<li>词汇的匹配相似</li>
+<li>语义的匹配相似</li>
+</ul>
+<h3 id="2-JaccardSimilarity方法"><a href="#2-JaccardSimilarity方法" class="headerlink" title="2. JaccardSimilarity方法"></a>2. JaccardSimilarity方法</h3><p>对文本进行分词，然后对每一个单词分配一个唯一的ID（token），为了计算文本之间的相似性。JaccardSimilarity方法的计算方法是：两个集合的交集/两个集合的并集</p>
+<a id="more"></a>
+<h3 id="3-二、文本的向量化"><a href="#3-二、文本的向量化" class="headerlink" title="3. 二、文本的向量化"></a>3. 二、文本的向量化</h3><p>文本-&gt;向量化为向量-&gt;向量空间中的某一个点-&gt;求两个点（即两个文本）之间的距离-&gt;得到文档的相似性</p>
+<h4 id="3-1-简单的向量化"><a href="#3-1-简单的向量化" class="headerlink" title="3.1 简单的向量化"></a>3.1 简单的向量化</h4><p>​    为每一个词语分配一个唯一的ID，假设所有的词语个数为N，用数组表示就是大小为N数组的下表。然后，如果文档中对应位置的词出现就将该位置置为1</p>
+<h4 id="3-2-TF-IDF向量化"><a href="#3-2-TF-IDF向量化" class="headerlink" title="3.2 TF-IDF向量化"></a>3.2 TF-IDF向量化</h4><p>​    通过TF-IDF向量化的方法，可以将每个词向量化成一个表示权重的小数，而不是0或1，它已经带有了文本的信息了。向量化后每一个词都带上了TF-IDF信息了，而TF-IDF的作用就是保留词在文档中的权重信息，这就相当于保留了文本的信息。于是，我们通过token的概念和TF-IDF方法，就把一个本文向量化了，并且向量化完了以后还保留了文本本身的信息，每一个向量就是一个前面提到的词袋。</p>
+<h3 id="4-实践"><a href="#4-实践" class="headerlink" title="4. 实践"></a>4. 实践</h3><p>​    <strong>实践：利用gensim的库corpora、models、similarities实现文档相似性的计算：</strong> </p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">训练语料:LDA_text.txt</span><br><span class="line">Human machine interface <span class="keyword">for</span> lab abc computer applications Human Human</span><br><span class="line">A survey of user opinion of computer system response time</span><br><span class="line">The EPS user interface management <span class="keyword">with</span> system</span><br><span class="line">System <span class="keyword">and</span> human system engineering testing of EPS</span><br><span class="line">Relation of user perceived response time to error measurement</span><br><span class="line">The generation of random binary unordered trees</span><br><span class="line">The intersection graph of paths <span class="keyword">in</span> trees</span><br><span class="line">Graph minors IV Widths of trees <span class="keyword">and</span> well quasi ordering</span><br><span class="line">Graph minors A survey</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> gensim <span class="keyword">import</span> corpora, models, similarities</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__==<span class="string">'__main__'</span>:</span><br><span class="line">    f = open(<span class="string">'./LDA_test.txt'</span>, <span class="string">'r'</span>)</span><br><span class="line">    stop_list = <span class="string">'for a of the and to in'</span>.split()</span><br><span class="line">    texts = [[word <span class="keyword">for</span> word <span class="keyword">in</span> line.strip().lower().split() <span class="keyword">if</span> word <span class="keyword">not</span> <span class="keyword">in</span> stop_list] <span class="keyword">for</span> line <span class="keyword">in</span> f.readlines()]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># build dictionary</span></span><br><span class="line">    dictionary = corpora.Dictionary(texts) <span class="comment"># construct dictionary for all documents and the length of dic is the number of uniq words</span></span><br><span class="line">    corpus = [dictionary.doc2bow(text) <span class="keyword">for</span> text <span class="keyword">in</span> texts] <span class="comment"># transform document to bag of words representaion according to dictionray</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># calculates the idf for each word in document</span></span><br><span class="line">    tfidf_model = models.TfidfModel(corpus)</span><br><span class="line">    tfidf = tfidf_model[corpus] <span class="comment"># [] method transform the bow representation to tfidf</span></span><br><span class="line"></span><br><span class="line">    query = <span class="string">'human system with System engineering testing'</span></span><br><span class="line">    query_bow = dictionary.doc2bow(query.split())</span><br><span class="line">    query_tfidf = tfidf_model[query_bow] <span class="comment"># calculate the query itfidf reprensentation using the bow  reprensentation</span></span><br><span class="line">    <span class="comment"># print query_tfidf</span></span><br><span class="line">    similarity = similarities.Similarity(<span class="string">'Similarity-index'</span>,tfidf, num_features=<span class="number">600</span>)</span><br><span class="line">    similarity.num_best = <span class="number">3</span></span><br><span class="line">    <span class="keyword">print</span> <span class="string">'query ='</span>, query</span><br><span class="line">    <span class="keyword">for</span> item <span class="keyword">in</span> similarity[query_tfidf]:</span><br><span class="line">        <span class="keyword">print</span> <span class="string">' '</span>.join(texts[item[<span class="number">0</span>]]), item[<span class="number">1</span>] <span class="comment"># 打印top3相似的文档和文档相似性</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">输出结果:</span><br><span class="line">        document                                       score</span><br><span class="line">system human system engineering testing eps     0.775833368301</span><br><span class="line">eps user interface management with system       0.349639117718</span><br><span class="line">human machine interface lab abc computer applications human human       0.240938946605</span><br></pre></td></tr></table></figure>
+<h3 id="5-vsm-向量空间模型"><a href="#5-vsm-向量空间模型" class="headerlink" title="5. vsm(向量空间模型)"></a>5. vsm(向量空间模型)</h3><p>​    对本文进行向量化完了之后，就是将文本映射为向量空间中的一个点。然后，通过计算向量空间中的两个点之间距离的方法计算文本之间的相似性</p>
+<h6 id="5-1-欧式距离"><a href="#5-1-欧式距离" class="headerlink" title="5.1 欧式距离"></a>5.1 欧式距离</h6><h6 id="5-2-余弦相似度距离"><a href="#5-2-余弦相似度距离" class="headerlink" title="5.2 余弦相似度距离"></a>5.2 余弦相似度距离</h6><h3 id="6-LDA主题模型"><a href="#6-LDA主题模型" class="headerlink" title="6. LDA主题模型"></a>6. LDA主题模型</h3><p>前述的方法构建文本向量的方法：只是机械的计算了词的向量，并没有任何上下文的关系，所有思想还停留在机器层面，还没有到更高层次上来。</p>
+<h4 id="4-2-LDA"><a href="#4-2-LDA" class="headerlink" title="4.2 LDA"></a>4.2 LDA</h4><p>P(W(词)|D(文章))=P(W(词)|T(主题))*P(T(主题)|D(文章))<br>（1）P(W(词)|D(文章)) 这个其实是可以直接统计出来的<br>（2）P(W(词)|T(主题)) 这个是模型的一部分，是要求出来的<br>（3）P(T(主题)|D(文章)) 这个是最后分类的结果<br>因此，模型的关键是求出来每一个词所属的主题分布情况。当来了一片新的文档后，统计出该文档属于每一个主题的概率分布。</p>
+]]></content>
+      <categories>
+        <category>自然语言处理</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>神经网络机器翻译</title>
+    <url>/2020/04/12/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91/</url>
+    <content><![CDATA[<h3 id="1-机器翻译技术"><a href="#1-机器翻译技术" class="headerlink" title="1. 机器翻译技术"></a>1. 机器翻译技术</h3><p>​      机器翻译是将一种语言的表述（例如英文）翻译为另外一种语言的表述（例如中文）的过程。机器翻译前些年主要是基于统计的机器翻译，统计机器翻译的基本模型是噪声信道模型。其中，如果要将源语言<script type="math/tex">src</script>翻译为目标语言<script type="math/tex">tgt</script>，则需要训练目标语言到源语言的翻译模型$P(src|tgt)$和目标语言的语言模型<script type="math/tex">P(tgt)</script>。     </p>
+<script type="math/tex; mode=display">
+P(tgt|src)= \frac{P(tgt*src)}{P(src)} = \frac{P{(src|tgt)*P(tgt)}}{P(src)}</script><a id="more"></a>
+<p>​      随着神经网络技术的发展，基于神经网络的机器翻译技术（<script type="math/tex">NMT</script>）逐渐替代传统的基于统计的机器翻译技术（<script type="math/tex">SMT</script>）。<script type="math/tex">NMT</script>的网络结构是由<script type="math/tex">Encoder</script>和<script type="math/tex">Decoder</script>两部分组成，<script type="math/tex">Encoder</script>部分对源语言的句子进行特征提取得到<img src="/2020/04/12/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91/nmt.jpg" alt></p>
+<p>句子中每个<script type="math/tex">token</script>的特征表示；<script type="math/tex">Decoder</script>部分是一个循环神经网络结构，利用<script type="math/tex">Encoder</script>部分得到特征作为网络的初始输入，然后利用<script type="math/tex">Beam Serach</script>算法进行目标语言的解码。</p>
+<h3 id="2-NMT机器翻译模型训练过程"><a href="#2-NMT机器翻译模型训练过程" class="headerlink" title="2. NMT机器翻译模型训练过程"></a>2. NMT机器翻译模型训练过程</h3><p>​        机器翻译的目标是实现从源语言的目标语言的翻译过程，同一般的训练神经网络过程一样，机器翻译的训练过程主要也包括模型的训练和预测。具体在实现过程中，其主要包括以下几个步骤：</p>
+<ol>
+<li>数据处理：将语言表示的字符串转换为ID，进而对每个token进行embedding编码，得到token的高维向量；</li>
+<li>编码：对输入的batch中的句子源语言句子进行编码（特征提取）</li>
+<li>解码：得到目标语言每个token的预测结果，并计算损失值（loss)</li>
+<li>反向传播：利用反向传播更新模型中的所有参数</li>
+</ol>
+<p>​       以中文到英文的翻译训练过程为例，逐步说明nmt如何实现机器翻译过程训练和预测的过程。如下所示，假定训练过程中的batch_size大小为3，源语言和目标语言一一对应，且都已经完成分词。</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">源语言</th>
+<th style="text-align:center">目标语言</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">春天 是 我 最 喜欢 的 季节 。</td>
+<td style="text-align:center">Spring is my favorite season .</td>
+</tr>
+<tr>
+<td style="text-align:center">他 喜欢 听 广播 。</td>
+<td style="text-align:center">He likes listening to the radio .</td>
+</tr>
+<tr>
+<td style="text-align:center">我 不是 学生 。</td>
+<td style="text-align:center">I ‘m not a student .</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="2-1-数据预处理"><a href="#2-1-数据预处理" class="headerlink" title="2.1 数据预处理"></a>2.1 数据预处理</h4><ol>
+<li>为源语言和目标语言中的每个词语分配唯一ID，得到单词到整数ID的映射词典。其中，目标语言在ID映射的过程中相比源语言要多<script type="math/tex"><s></script>和<script type="math/tex"></s></script>作为句子开头和结束的标志符号。</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">src_word2id &#x3D; &#123;&quot;&lt;pad&gt;&quot;:0, &quot;&lt;unk&gt;&quot;:1, &quot;春天&quot;:2,&quot;是&quot;:3, &quot;我&quot;:4, &quot;最&quot;:5, &quot;喜欢&quot;:6, &quot;的&quot;：7,</span><br><span class="line">&quot;季节&quot;:8, &quot;。&quot;:9, &quot;他&quot;:10, &quot;听&quot;:11, &quot;广播&quot;:12, &quot;不是&quot;:13, &quot;学生&quot;:14 &#125;</span><br><span class="line">tgt_word2id &#x3D; &#123;&quot;&lt;pad&gt;&quot;:0, &quot;&lt;unk&gt;&quot;:1, &quot;&lt;s&gt;&quot;:2, &quot;&lt;&#x2F;s&gt;&quot;:3, &quot;Spring&quot;:4, &quot;is&quot;:5, &quot;my&quot;:6, </span><br><span class="line">&quot;favorite&quot;:7, &quot;season&quot;:8, &quot;He&quot;:9, &quot;likes&quot;:10, &quot;listening&quot;:11, &quot;to&quot;:12, </span><br><span class="line">&quot;the&quot;:13, &quot;.&quot;:14, &quot;I&quot;:15, &quot;&#39;m&quot;:16, &quot;not&quot;:17, &quot;a&quot;: 18, &quot;student&quot;:19, &quot;radio&quot;:20&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>将输入的语言的字符串表示转换为ID</li>
+</ol>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">源语言</th>
+<th style="text-align:center">目标语言</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">[2, 3, 4, 5, 6, 7, 8, 9]</td>
+<td style="text-align:center">[2, 4, 5, 6, 7, 8, 14, 3]</td>
+</tr>
+<tr>
+<td style="text-align:center">[10, 6, 11, 12, 9]</td>
+<td style="text-align:center">[2, 9, 10, 11, 12, 13, 20, 14, 3]</td>
+</tr>
+<tr>
+<td style="text-align:center">[4, 13, 14, 9]</td>
+<td style="text-align:center">[2, 15, 16, 18, 19, 14, 3]</td>
+</tr>
+</tbody>
+</table>
+</div>
+<ol>
+<li>padding，神经网络结构要求的输入需要长度一致，所以需要对batch中长度不一的句子进行填充，即以batch中长度最长的句子为标准，在其他句子的句尾进行填充<pad>。</pad></li>
+</ol>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">源语言(max_src_len=8)</th>
+<th style="text-align:center">目标语言(max_tgt_len=9)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">[2, 3, 4, 5, 6, 7, 8, 9]</td>
+<td style="text-align:center">[2, 4, 5, 6, 7, 8, 14, 3, <strong>0</strong>]</td>
+</tr>
+<tr>
+<td style="text-align:center">[10, 6, 11, 12, 9<strong>,0,0,0</strong>]</td>
+<td style="text-align:center">[2, 9, 10, 11, 12, 13, 20, 14, 3]</td>
+</tr>
+<tr>
+<td style="text-align:center">[4, 13, 14, 9,<strong>0</strong> ,<strong>0, 0, 0</strong>]</td>
+<td style="text-align:center">[2, 15, 16, 18, 19, 14, 3, <strong>0</strong>, <strong>0</strong>]</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>​        </p>
+<p>​       至此，源语言和目标语言已经转换为二维矩阵: </p>
+<script type="math/tex; mode=display">
+src\_batch = \left[
+\begin{matrix}
+   2&3&4&5&6&7&8&9\\
+   10&6&11&12&9&0&0&0 \\
+  4&13&14&9&0&0&0&0
+\end{matrix}
+\right]
+
+tgt\_batch = \left[
+\begin{matrix}
+  2&4&5&6&7&8&14&3&0\\
+  2&9&10&11&12&13&20&14&3 \\
+  2&15&16&18&19&14&3&0&0
+\end{matrix}
+\right]</script><h4 id="2-2-词向量embedding映射"><a href="#2-2-词向量embedding映射" class="headerlink" title="2.2 词向量embedding映射"></a>2.2 词向量embedding映射</h4><p>​        将输入的单词ID转换为其对应的embedding表示，这里单词的embedding表示既可以预先训练好的，也可是    随机初始化的作为模型学习的参数。以pytorch的实现为例，其提供了对应的方法</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">self.source = torch.nn.Embedding(len(vocab.src), self.embed_size, src_pad_token_idx)</span><br><span class="line">self.target = torch.nn.Embedding(len(vocab.tgt), self.embed_size, tgt_pad_token_idx)</span><br></pre></td></tr></table></figure>
+<p>​      通过词向量映射，数据处理的过程就结束了。最终，源语言和目标语言的输入转换为</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">src_input = (batch_size, max_src_len, embed_size)</span><br><span class="line">tgt_input = (batchi_size, max_tgt_len, embed_size)</span><br></pre></td></tr></table></figure>
+<h4 id="2-3-前向传播"><a href="#2-3-前向传播" class="headerlink" title="2.3 前向传播"></a>2.3 前向传播</h4><p>​        将源语言的句子（batch）作为BI-LSTM网络的输入，通过BI-LSTM的的编码双向编码就能够得到每个单词的双向表示，即tensor的shape为（batch_size, max_src_len, 2*hidden_size)。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">enc_hiddens, dec_init_state = self.encode(source_padded, source_lengths)</span><br><span class="line"><span class="comment"># enc_hiddens=(batch_size, max_src_len, 2*hidden_size)</span></span><br><span class="line"><span class="comment"># dec_init_state[0]=(b, h)：decoder的初始hidden输入，</span></span><br><span class="line"><span class="comment"># dec_init_state[1]=(b, h):decoder的初始cell输入</span></span><br></pre></td></tr></table></figure>
+<h4 id="2-4-计算batch-loss"><a href="#2-4-计算batch-loss" class="headerlink" title="2.4 计算batch loss"></a>2.4 计算batch loss</h4><p>​         将编码器的dec_init_state作为解码器的LSTM中的hidden和cell的初始输入，即$h^{dec}_0$=dec_init_state[0]，$c^{dec}_0$=dec_init_state[1]。[$x^{dec}_{t}$，$h^{dec}_{t-1}$，$c^{dec}_{t-1}$] ，经过LSTM的输出<script type="math/tex">h^{dec}_{t}</script>经全连接变换得到预测词语的概率分布估计，然后和实绩的标签计算loss，求和得到整个batch的loss值。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">enc_masks = self.generate_sent_masks(enc_hiddens, source_lengths)</span><br><span class="line">combined_outputs = self.decode(enc_hiddens, enc_masks, dec_init_state, target_padded)</span><br><span class="line">P = F.log_softmax(self.target_vocab_projection(combined_outputs), dim=<span class="number">-1</span>) </span><br><span class="line"><span class="comment"># Zero out, probabilities for which we have nothing in the target text </span></span><br><span class="line">target_masks = (target_padded != self.vocab.tgt[<span class="string">'&lt;pad&gt;'</span>]).float() <span class="comment"># [src_len, b)]</span></span><br><span class="line"><span class="comment"># Compute log probability of generating true target words</span></span><br><span class="line">target_gold_words_log_prob = torch.gather(P, index=target_padded[<span class="number">1</span>:].unsqueeze(<span class="number">-1</span>), dim=<span class="number">-1</span>).squeeze(<span class="number">-1</span>) * target_masks[<span class="number">1</span>:]</span><br><span class="line">scores = target_gold_words_log_prob.sum(dim=<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+<h4 id="2-5-反向传播，梯度的更新"><a href="#2-5-反向传播，梯度的更新" class="headerlink" title="2.5 反向传播，梯度的更新"></a>2.5 反向传播，梯度的更新</h4><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">optimizer.zero_grad() <span class="comment"># 所有参数的梯度值设置为0</span></span><br><span class="line">batch_size = len(src_sents)</span><br><span class="line">example_losses = -model(src_sents, tgt_sents) <span class="comment"># (batch_size,)</span></span><br><span class="line">batch_loss = example_losses.sum()</span><br><span class="line">loss = batch_loss / batch_size</span><br><span class="line">loss.backward()</span><br><span class="line">grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), clip_grad)</span><br><span class="line">optimizer.step()</span><br></pre></td></tr></table></figure>
+<h3 id="3-机器翻译解码（预测）过程"><a href="#3-机器翻译解码（预测）过程" class="headerlink" title="3. 机器翻译解码（预测）过程"></a>3. 机器翻译解码（预测）过程</h3><p>​      解码过程，主要使用beam search算法，通过设定beam_size大小，得到多个候选译文及概率得分值。</p>
+]]></content>
+      <categories>
+        <category>自然语言处理</category>
+      </categories>
+  </entry>
+</search>

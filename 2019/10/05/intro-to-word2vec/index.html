@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.useso.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mjbjtu.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Intorduction to wordvectors0. Introduction and Word vectors The courses Human language and word meaning Word2vec introductions Word2vec objection function gradients Optimization basics Looking at word">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Intro-to-word2vec">
+<meta property="og:url" content="http://mjbjtu.github.io/2019/10/05/intro-to-word2vec/index.html">
+<meta property="og:site_name" content="每天进步一点">
+<meta property="og:description" content="Intorduction to wordvectors0. Introduction and Word vectors The courses Human language and word meaning Word2vec introductions Word2vec objection function gradients Optimization basics Looking at word">
+<meta property="og:image" content="http://mjbjtu.github.io/2019/10/05/intro-to-word2vec/word2vecOverview.png">
+<meta property="og:image" content="http://mjbjtu.github.io/2019/10/05/intro-to-word2vec/prediction_function.png">
+<meta property="og:image" content="http://mjbjtu.github.io/2019/10/05/intro-to-word2vec/train_w2v_1.png">
+<meta property="og:image" content="http://mjbjtu.github.io/2019/10/05/intro-to-word2vec/train_w2v_2.png">
+<meta property="article:published_time" content="2019-10-05T12:48:10.000Z">
+<meta property="article:modified_time" content="2020-04-20T13:06:48.484Z">
+<meta property="article:author" content="mjbjtu">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://mjbjtu.github.io/2019/10/05/intro-to-word2vec/word2vecOverview.png">
+
+<link rel="canonical" href="http://mjbjtu.github.io/2019/10/05/intro-to-word2vec/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>Intro-to-word2vec | 每天进步一点</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">每天进步一点</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://mjbjtu.github.io/2019/10/05/intro-to-word2vec/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="mjbjtu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="每天进步一点">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Intro-to-word2vec
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-10-05 20:48:10" itemprop="dateCreated datePublished" datetime="2019-10-05T20:48:10+08:00">2019-10-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">自然语言处理</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Intorduction-to-wordvectors"><a href="#Intorduction-to-wordvectors" class="headerlink" title="Intorduction to wordvectors"></a>Intorduction to wordvectors</h1><h2 id="0-Introduction-and-Word-vectors"><a href="#0-Introduction-and-Word-vectors" class="headerlink" title="0. Introduction and Word vectors"></a>0. Introduction and Word vectors</h2><ul>
+<li>The courses</li>
+<li>Human language and word meaning</li>
+<li>Word2vec introductions</li>
+<li>Word2vec objection function gradients</li>
+<li>Optimization basics</li>
+<li>Looking at word vectors</li>
+</ul>
+<h2 id="2-人类语言和单词的语义"><a href="#2-人类语言和单词的语义" class="headerlink" title="2. 人类语言和单词的语义"></a>2. 人类语言和单词的语义</h2><h3 id="2-1-单词的离散表示"><a href="#2-1-单词的离散表示" class="headerlink" title="2.1 单词的离散表示"></a>2.1 单词的离散表示</h3><p>在传统的自然语言处理中，将单词表示为离散的符号。例如：hotel，conference，motel -&gt;localist 表示</p>
+<p><strong>One-hot表示：</strong></p>
+<ul>
+<li>motel=[0 0 0 0 0 0 0 0 1 0 0 0]</li>
+<li>hotel=[0 0 0 0 0 0 0 1 0 0 0 0]</li>
+<li>单词向量的维度等于词汇表的大小（例如，500，000）</li>
+</ul>
+<p><strong>离散表示的问题</strong></p>
+<ul>
+<li>语义鸿沟，例如motel和hotel的语义相似，但是从向量的角度没有相似关系</li>
+<li>向量的维度会很大，而且会存稀疏的问题</li>
+</ul>
+<a id="more"></a>
+<h3 id="2-2-基于上下文对单词进行表示-分布式语义"><a href="#2-2-基于上下文对单词进行表示-分布式语义" class="headerlink" title="2.2 基于上下文对单词进行表示(分布式语义)"></a>2.2 基于上下文对单词进行表示(分布式语义)</h3><ul>
+<li>Distributional Semantics: A word’s meaning is given by the words that frequently appear close-by<ul>
+<li>“You shall know a word by the company it keeps”</li>
+<li>One of the most successful ideas of modern statistical NLP</li>
+</ul>
+</li>
+<li>When a word appear in a text, its context is the set of words that appear nearby(within a fixed-size window)</li>
+<li><p>Use the many contexts of w to build up a representation of w </p>
+<ul>
+<li>government debt problmes truming into $banking$ crises as happended in 2009</li>
+<li>saying that Europe needs unified $banking$ regulation to replace the hodgepodge</li>
+<li>India has just given its $banking$ system a shot in the arm</li>
+</ul>
+<p><strong>The Context Words will represent banking</strong></p>
+</li>
+</ul>
+<h3 id="2-3-Word-Vectors-词向量"><a href="#2-3-Word-Vectors-词向量" class="headerlink" title="2.3 Word Vectors(词向量)"></a>2.3 Word Vectors(词向量)</h3><ul>
+<li>We will build a dense vectors for each word, chosen so that it is similar to vectors of words that appear in similar contexts</li>
+<li><script type="math/tex; mode=display">
+banking= \left[
+\begin{matrix}
+ 0.286\\
+ 0.792 \\
+ -0.177\\
+ -0.107\\
+ 0.109\\
+ -0.542\\
+ 0.349\\
+0.271
+\end{matrix} 
+\right]</script></li>
+<li>Note: <strong>word vectors</strong> are somtimes called <strong>word embeddings</strong> or <strong>word representations</strong>.</li>
+</ul>
+<h2 id="3-Word2Vec"><a href="#3-Word2Vec" class="headerlink" title="3. Word2Vec"></a>3. Word2Vec</h2><h3 id="3-1-OverView"><a href="#3-1-OverView" class="headerlink" title="3.1 OverView"></a>3.1 OverView</h3><p><strong>Word2vec(Mikolov et at. 2013) is a framework for learning word vectors</strong></p>
+<p><strong>Idea:</strong></p>
+<ul>
+<li>We have a large corpus of text</li>
+<li>Every word in a fixed vocabulary is represented by a vector</li>
+<li>Go through each position t in the text, which has a center word c and context (“outside”) words o</li>
+<li>Use the similarity of the word vecotrs for c and o to calculate the probability of o given c</li>
+<li>Keep adjusting the word vectors to maximize this probability</li>
+</ul>
+<p><img src="/2019/10/05/intro-to-word2vec/word2vecOverview.png" height="250" width="500"></p>
+<h3 id="3-2-Word2Vec-目标函数"><a href="#3-2-Word2Vec-目标函数" class="headerlink" title="3.2 Word2Vec 目标函数"></a>3.2 Word2Vec 目标函数</h3><p>For each position $t=1,2,…,T$, predict context words within a window of fixed size $m$, given center word $w_j$</p>
+<p>$Likehood = L(\theta) = \prod_{t=1}^{T}\prod_{-m\leq j\leq m(j\neq0)}{P(w_{t+j}|w;\theta)}$</p>
+<ul>
+<li>$\theta$ is all variables to be optimized </li>
+</ul>
+<p><strong>Objective function $J(\theta)$ is the (average) negative log likelihood:</strong></p>
+<script type="math/tex; mode=display">J(\theta) = -\frac{1}{T}logL(\theta) = -\frac{1}{T}\sum_{t=1}^{T}\sum_{-m\leq j\leq m(j\neq 0)}{log(P(w_{t+j}|w;\theta))}</script><p><strong>Minimizing the objective function $\Leftrightarrow$Maximzing predictive accuracy</strong></p>
+<script type="math/tex; mode=display">J(\theta) = -\frac{1}{T}\sum_{t=1}^{T}\sum_{-m\leq j\leq m(j\neq 0)}{log(P(w_{t+j}|w;\theta))}</script><ul>
+<li>Question: 如何计算概率$P(W_{t+j}|w;\theta)$ ?</li>
+<li>Answer: 每个单词设置两个向量：<ul>
+<li>$v_w$ 当$w$是中心词的时候</li>
+<li>$u_w$ 当$w$不是中心词的时候</li>
+</ul>
+</li>
+<li>那么，通过中心词$c$预测上下文$o$的概率计算方法：<script type="math/tex; mode=display">P(o|c) = \frac{exp(u_{o}^Tv_{c})}{\sum_{w\in V}{exp(u^T_wv_c)}}</script></li>
+</ul>
+<h3 id="3-3-Word2vec-预测函数"><a href="#3-3-Word2vec-预测函数" class="headerlink" title="3.3 Word2vec 预测函数"></a>3.3 Word2vec 预测函数</h3><p><img src="/2019/10/05/intro-to-word2vec/prediction_function.png" height="300" width="500"></p>
+<h3 id="3-4-训练word2vec模型"><a href="#3-4-训练word2vec模型" class="headerlink" title="3.4 训练word2vec模型"></a>3.4 训练word2vec模型</h3><html>
+    <table style="margin-left: auto; margin-right: auto;">
+        <tr>
+            <td>
+               <img src="/2019/10/05/intro-to-word2vec/train_w2v_1.png" height="300" width="450"> 
+            </td>
+            <td>
+   <img src="/2019/10/05/intro-to-word2vec/train_w2v_2.png" height="300" width="500">
+            </td>
+        </tr>
+    </table>
+</html>
+
+<ul>
+<li>优化损失函数$J(\theta)$训练单词的词向量</li>
+<li>利用损失函数$J(\theta)$对所有参数即$\theta$的梯度，利用梯度下降的方法优化$J(\theta)$</li>
+<li>参数向量$\theta$的维度等于d*2*v(d是每个单词的向量维度，2表示每个单词有连个向量即中心词向量$u_w$和非中心词向量$v_w$，v表示词汇表的大小即总共有多少个单词数量)    </li>
+</ul>
+<h3 id="3-5-word2vec梯度下降的推导"><a href="#3-5-word2vec梯度下降的推导" class="headerlink" title="3.5 word2vec梯度下降的推导"></a>3.5 word2vec梯度下降的推导</h3><script type="math/tex; mode=display">max.   J^{'}(\theta) = \prod_{t=1}^{T}\prod_{-m\leq j\leq m(j\neq 0)}P(w_{t+j}|w_t;\theta)</script><p>等价于，</p>
+<script type="math/tex; mode=display">\begin{align}
+min.  J(\theta) &= -\frac{1}{T}\sum_{t=1}^{T}\sum_{-m\leq j\leq m(j\neq 0)}logP(w_{t+j}|w_t;\theta)\\
+ &= -\frac{1}{T}\sum_{t=1}^{T}[logP(w_{t-m}|w_t;\theta)+logP(w_{t-m+1}|w_t;\theta)+...+logP(w_{t+m-1}|w_t;\theta)+logP(w_{t+m}|w_t;\theta)]\\
+ & = -\frac{1}{T} \sum_{t=1}^{T} [log\frac{exp(u_{t-m}^Tv_t)}{\sum_{w\in V}exp(u_w^Tv_t)} +...+log\frac{exp(u_{t+m}^Tv_t)}{\sum_{w\in V}exp(u_w^Tv_t)}]
+ \end{align}</script><p>其中，</p>
+<script type="math/tex; mode=display">P(o|c) = \frac{exp(u^T_ov_c)}{\sum_{w\in V}exp(u_w^Tv_c)}</script><p>$J(\theta)对v_c$的偏导数：</p>
+<script type="math/tex; mode=display">\begin{align}
+\frac{\partial}{\partial v_c}logP(o|c) &= \frac{\partial}{\partial v_c}log\frac{exp(u^T_ov_c)}{\sum_{w=1}^{V}exp(u^T_wv_c)}\\
+&= \frac{\partial}{\partial v_c}log[exp(u^T_ov_c)]-\frac{\partial}{\partial v_c}log\sum_{w=1}^{V}exp(u^T_wv_c)\\
+& = \frac{\partial}{\partial v_c}u^T_ov_c-\frac{1}{\sum_{w=1}^{V}exp(u^T_wv_c)}\times \frac{\partial}{\partial v_c}\sum_{w=1}^{V}exp(u^T_wv_c)\\
+&= u_o - \frac{1}{\sum_{w=1}^{V}exp(u^T_wv_c)}\times \sum_{x=1}^{V}\frac{\partial}{\partial v_c}exp(u^T_xv_c)\\
+&= u_o - \frac{1}{\sum_{w=1}^{V}exp(u^T_wv_c)}\times \sum_{x=1}^{V}exp(u^T_xv_c)\frac{\partial}{\partial v_c}u_x^Tv_c\\
+&= u_o - \frac{1}{\sum_{w=1}^{V}exp(u^T_wv_c)}\times \sum_{x=1}^{V}exp(u^T_xv_c)u_x\\
+&= u_o - \frac{\sum_{x=1}^{V}exp(u^T_xv_c)u_x}{\sum_{w=1}^{V}exp(u^T_wv_c)}\\
+& = u_o - \sum_{x=1}^{V}\frac{exp(u^T_xv_c)}{\sum_{w=1}^{V}exp(u^T_wv_c)}u_x\\
+& = u_o - \sum_{x=1}^{V}P(x|c)\times u_x
+\end{align}</script><p>​     </p>
+<p>-[1]  [cs224n ][]</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/09/21/%E6%A2%AF%E5%BA%A6%E6%A3%80%E6%9F%A5%20/" rel="prev" title="梯度检查">
+      <i class="fa fa-chevron-left"></i> 梯度检查
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/10/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" rel="next" title="卷积神经网络">
+      卷积神经网络 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Intorduction-to-wordvectors"><span class="nav-number">1.</span> <span class="nav-text">Intorduction to wordvectors</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#0-Introduction-and-Word-vectors"><span class="nav-number">1.1.</span> <span class="nav-text">0. Introduction and Word vectors</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-人类语言和单词的语义"><span class="nav-number">1.2.</span> <span class="nav-text">2. 人类语言和单词的语义</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-单词的离散表示"><span class="nav-number">1.2.1.</span> <span class="nav-text">2.1 单词的离散表示</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-基于上下文对单词进行表示-分布式语义"><span class="nav-number">1.2.2.</span> <span class="nav-text">2.2 基于上下文对单词进行表示(分布式语义)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-Word-Vectors-词向量"><span class="nav-number">1.2.3.</span> <span class="nav-text">2.3 Word Vectors(词向量)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Word2Vec"><span class="nav-number">1.3.</span> <span class="nav-text">3. Word2Vec</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-OverView"><span class="nav-number">1.3.1.</span> <span class="nav-text">3.1 OverView</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-Word2Vec-目标函数"><span class="nav-number">1.3.2.</span> <span class="nav-text">3.2 Word2Vec 目标函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-Word2vec-预测函数"><span class="nav-number">1.3.3.</span> <span class="nav-text">3.3 Word2vec 预测函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4-训练word2vec模型"><span class="nav-number">1.3.4.</span> <span class="nav-text">3.4 训练word2vec模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-5-word2vec梯度下降的推导"><span class="nav-number">1.3.5.</span> <span class="nav-text">3.5 word2vec梯度下降的推导</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">mjbjtu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">17</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/mjbjtu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;mjbjtu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/void_sky@163.com" title="E-Mail → void_sky@163.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.linkedin.com/in/%E5%86%9B-%E9%A9%AC-44bb7212b/" title="LinkedIn → https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;军-马-44bb7212b&#x2F;" rel="noopener" target="_blank"><i class="linkedin fa-fw"></i>LinkedIn</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">mjbjtu</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+    
+
+  
+
+</body>
+</html>

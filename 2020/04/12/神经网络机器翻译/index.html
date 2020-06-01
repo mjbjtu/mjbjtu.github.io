@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.useso.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mjbjtu.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="1. 机器翻译技术​      机器翻译是将一种语言的表述（例如英文）翻译为另外一种语言的表述（例如中文）的过程。机器翻译前些年主要是基于统计的机器翻译，统计机器翻译的基本模型是噪声信道模型。其中，如果要将源语言src翻译为目标语言tgt，则需要训练目标语言到源语言的翻译模型$P(src|tgt)$和目标语言的语言模型P(tgt)。       P(tgt|src)&#x3D; \frac{P(tgt*sr">
+<meta property="og:type" content="article">
+<meta property="og:title" content="神经网络机器翻译">
+<meta property="og:url" content="http://mjbjtu.github.io/2020/04/12/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91/index.html">
+<meta property="og:site_name" content="每天进步一点">
+<meta property="og:description" content="1. 机器翻译技术​      机器翻译是将一种语言的表述（例如英文）翻译为另外一种语言的表述（例如中文）的过程。机器翻译前些年主要是基于统计的机器翻译，统计机器翻译的基本模型是噪声信道模型。其中，如果要将源语言src翻译为目标语言tgt，则需要训练目标语言到源语言的翻译模型$P(src|tgt)$和目标语言的语言模型P(tgt)。       P(tgt|src)&#x3D; \frac{P(tgt*sr">
+<meta property="og:image" content="http://mjbjtu.github.io/2020/04/12/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91/nmt.jpg">
+<meta property="article:published_time" content="2020-04-12T13:46:12.000Z">
+<meta property="article:modified_time" content="2020-05-18T12:43:22.750Z">
+<meta property="article:author" content="mjbjtu">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://mjbjtu.github.io/2020/04/12/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91/nmt.jpg">
+
+<link rel="canonical" href="http://mjbjtu.github.io/2020/04/12/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>神经网络机器翻译 | 每天进步一点</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">每天进步一点</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://mjbjtu.github.io/2020/04/12/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="mjbjtu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="每天进步一点">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          神经网络机器翻译
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-04-12 21:46:12" itemprop="dateCreated datePublished" datetime="2020-04-12T21:46:12+08:00">2020-04-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">自然语言处理</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="1-机器翻译技术"><a href="#1-机器翻译技术" class="headerlink" title="1. 机器翻译技术"></a>1. 机器翻译技术</h3><p>​      机器翻译是将一种语言的表述（例如英文）翻译为另外一种语言的表述（例如中文）的过程。机器翻译前些年主要是基于统计的机器翻译，统计机器翻译的基本模型是噪声信道模型。其中，如果要将源语言<script type="math/tex">src</script>翻译为目标语言<script type="math/tex">tgt</script>，则需要训练目标语言到源语言的翻译模型$P(src|tgt)$和目标语言的语言模型<script type="math/tex">P(tgt)</script>。     </p>
+<script type="math/tex; mode=display">
+P(tgt|src)= \frac{P(tgt*src)}{P(src)} = \frac{P{(src|tgt)*P(tgt)}}{P(src)}</script><a id="more"></a>
+<p>​      随着神经网络技术的发展，基于神经网络的机器翻译技术（<script type="math/tex">NMT</script>）逐渐替代传统的基于统计的机器翻译技术（<script type="math/tex">SMT</script>）。<script type="math/tex">NMT</script>的网络结构是由<script type="math/tex">Encoder</script>和<script type="math/tex">Decoder</script>两部分组成，<script type="math/tex">Encoder</script>部分对源语言的句子进行特征提取得到<img src="/2020/04/12/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E6%9C%BA%E5%99%A8%E7%BF%BB%E8%AF%91/nmt.jpg" alt></p>
+<p>句子中每个<script type="math/tex">token</script>的特征表示；<script type="math/tex">Decoder</script>部分是一个循环神经网络结构，利用<script type="math/tex">Encoder</script>部分得到特征作为网络的初始输入，然后利用<script type="math/tex">Beam Serach</script>算法进行目标语言的解码。</p>
+<h3 id="2-NMT机器翻译模型训练过程"><a href="#2-NMT机器翻译模型训练过程" class="headerlink" title="2. NMT机器翻译模型训练过程"></a>2. NMT机器翻译模型训练过程</h3><p>​        机器翻译的目标是实现从源语言的目标语言的翻译过程，同一般的训练神经网络过程一样，机器翻译的训练过程主要也包括模型的训练和预测。具体在实现过程中，其主要包括以下几个步骤：</p>
+<ol>
+<li>数据处理：将语言表示的字符串转换为ID，进而对每个token进行embedding编码，得到token的高维向量；</li>
+<li>编码：对输入的batch中的句子源语言句子进行编码（特征提取）</li>
+<li>解码：得到目标语言每个token的预测结果，并计算损失值（loss)</li>
+<li>反向传播：利用反向传播更新模型中的所有参数</li>
+</ol>
+<p>​       以中文到英文的翻译训练过程为例，逐步说明nmt如何实现机器翻译过程训练和预测的过程。如下所示，假定训练过程中的batch_size大小为3，源语言和目标语言一一对应，且都已经完成分词。</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">源语言</th>
+<th style="text-align:center">目标语言</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">春天 是 我 最 喜欢 的 季节 。</td>
+<td style="text-align:center">Spring is my favorite season .</td>
+</tr>
+<tr>
+<td style="text-align:center">他 喜欢 听 广播 。</td>
+<td style="text-align:center">He likes listening to the radio .</td>
+</tr>
+<tr>
+<td style="text-align:center">我 不是 学生 。</td>
+<td style="text-align:center">I ‘m not a student .</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="2-1-数据预处理"><a href="#2-1-数据预处理" class="headerlink" title="2.1 数据预处理"></a>2.1 数据预处理</h4><ol>
+<li>为源语言和目标语言中的每个词语分配唯一ID，得到单词到整数ID的映射词典。其中，目标语言在ID映射的过程中相比源语言要多<script type="math/tex"><s></script>和<script type="math/tex"></s></script>作为句子开头和结束的标志符号。</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">src_word2id &#x3D; &#123;&quot;&lt;pad&gt;&quot;:0, &quot;&lt;unk&gt;&quot;:1, &quot;春天&quot;:2,&quot;是&quot;:3, &quot;我&quot;:4, &quot;最&quot;:5, &quot;喜欢&quot;:6, &quot;的&quot;：7,</span><br><span class="line">&quot;季节&quot;:8, &quot;。&quot;:9, &quot;他&quot;:10, &quot;听&quot;:11, &quot;广播&quot;:12, &quot;不是&quot;:13, &quot;学生&quot;:14 &#125;</span><br><span class="line">tgt_word2id &#x3D; &#123;&quot;&lt;pad&gt;&quot;:0, &quot;&lt;unk&gt;&quot;:1, &quot;&lt;s&gt;&quot;:2, &quot;&lt;&#x2F;s&gt;&quot;:3, &quot;Spring&quot;:4, &quot;is&quot;:5, &quot;my&quot;:6, </span><br><span class="line">&quot;favorite&quot;:7, &quot;season&quot;:8, &quot;He&quot;:9, &quot;likes&quot;:10, &quot;listening&quot;:11, &quot;to&quot;:12, </span><br><span class="line">&quot;the&quot;:13, &quot;.&quot;:14, &quot;I&quot;:15, &quot;&#39;m&quot;:16, &quot;not&quot;:17, &quot;a&quot;: 18, &quot;student&quot;:19, &quot;radio&quot;:20&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>将输入的语言的字符串表示转换为ID</li>
+</ol>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">源语言</th>
+<th style="text-align:center">目标语言</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">[2, 3, 4, 5, 6, 7, 8, 9]</td>
+<td style="text-align:center">[2, 4, 5, 6, 7, 8, 14, 3]</td>
+</tr>
+<tr>
+<td style="text-align:center">[10, 6, 11, 12, 9]</td>
+<td style="text-align:center">[2, 9, 10, 11, 12, 13, 20, 14, 3]</td>
+</tr>
+<tr>
+<td style="text-align:center">[4, 13, 14, 9]</td>
+<td style="text-align:center">[2, 15, 16, 18, 19, 14, 3]</td>
+</tr>
+</tbody>
+</table>
+</div>
+<ol>
+<li>padding，神经网络结构要求的输入需要长度一致，所以需要对batch中长度不一的句子进行填充，即以batch中长度最长的句子为标准，在其他句子的句尾进行填充<pad>。</pad></li>
+</ol>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">源语言(max_src_len=8)</th>
+<th style="text-align:center">目标语言(max_tgt_len=9)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">[2, 3, 4, 5, 6, 7, 8, 9]</td>
+<td style="text-align:center">[2, 4, 5, 6, 7, 8, 14, 3, <strong>0</strong>]</td>
+</tr>
+<tr>
+<td style="text-align:center">[10, 6, 11, 12, 9<strong>,0,0,0</strong>]</td>
+<td style="text-align:center">[2, 9, 10, 11, 12, 13, 20, 14, 3]</td>
+</tr>
+<tr>
+<td style="text-align:center">[4, 13, 14, 9,<strong>0</strong> ,<strong>0, 0, 0</strong>]</td>
+<td style="text-align:center">[2, 15, 16, 18, 19, 14, 3, <strong>0</strong>, <strong>0</strong>]</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>​        </p>
+<p>​       至此，源语言和目标语言已经转换为二维矩阵: </p>
+<script type="math/tex; mode=display">
+src\_batch = \left[
+\begin{matrix}
+   2&3&4&5&6&7&8&9\\
+   10&6&11&12&9&0&0&0 \\
+  4&13&14&9&0&0&0&0
+\end{matrix}
+\right]
+
+tgt\_batch = \left[
+\begin{matrix}
+  2&4&5&6&7&8&14&3&0\\
+  2&9&10&11&12&13&20&14&3 \\
+  2&15&16&18&19&14&3&0&0
+\end{matrix}
+\right]</script><h4 id="2-2-词向量embedding映射"><a href="#2-2-词向量embedding映射" class="headerlink" title="2.2 词向量embedding映射"></a>2.2 词向量embedding映射</h4><p>​        将输入的单词ID转换为其对应的embedding表示，这里单词的embedding表示既可以预先训练好的，也可是    随机初始化的作为模型学习的参数。以pytorch的实现为例，其提供了对应的方法</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">self.source = torch.nn.Embedding(len(vocab.src), self.embed_size, src_pad_token_idx)</span><br><span class="line">self.target = torch.nn.Embedding(len(vocab.tgt), self.embed_size, tgt_pad_token_idx)</span><br></pre></td></tr></table></figure>
+<p>​      通过词向量映射，数据处理的过程就结束了。最终，源语言和目标语言的输入转换为</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">src_input = (batch_size, max_src_len, embed_size)</span><br><span class="line">tgt_input = (batchi_size, max_tgt_len, embed_size)</span><br></pre></td></tr></table></figure>
+<h4 id="2-3-前向传播"><a href="#2-3-前向传播" class="headerlink" title="2.3 前向传播"></a>2.3 前向传播</h4><p>​        将源语言的句子（batch）作为BI-LSTM网络的输入，通过BI-LSTM的的编码双向编码就能够得到每个单词的双向表示，即tensor的shape为（batch_size, max_src_len, 2*hidden_size)。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">enc_hiddens, dec_init_state = self.encode(source_padded, source_lengths)</span><br><span class="line"><span class="comment"># enc_hiddens=(batch_size, max_src_len, 2*hidden_size)</span></span><br><span class="line"><span class="comment"># dec_init_state[0]=(b, h)：decoder的初始hidden输入，</span></span><br><span class="line"><span class="comment"># dec_init_state[1]=(b, h):decoder的初始cell输入</span></span><br></pre></td></tr></table></figure>
+<h4 id="2-4-计算batch-loss"><a href="#2-4-计算batch-loss" class="headerlink" title="2.4 计算batch loss"></a>2.4 计算batch loss</h4><p>​         将编码器的dec_init_state作为解码器的LSTM中的hidden和cell的初始输入，即$h^{dec}_0$=dec_init_state[0]，$c^{dec}_0$=dec_init_state[1]。[$x^{dec}_{t}$，$h^{dec}_{t-1}$，$c^{dec}_{t-1}$] ，经过LSTM的输出<script type="math/tex">h^{dec}_{t}</script>经全连接变换得到预测词语的概率分布估计，然后和实绩的标签计算loss，求和得到整个batch的loss值。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">enc_masks = self.generate_sent_masks(enc_hiddens, source_lengths)</span><br><span class="line">combined_outputs = self.decode(enc_hiddens, enc_masks, dec_init_state, target_padded)</span><br><span class="line">P = F.log_softmax(self.target_vocab_projection(combined_outputs), dim=<span class="number">-1</span>) </span><br><span class="line"><span class="comment"># Zero out, probabilities for which we have nothing in the target text </span></span><br><span class="line">target_masks = (target_padded != self.vocab.tgt[<span class="string">'&lt;pad&gt;'</span>]).float() <span class="comment"># [src_len, b)]</span></span><br><span class="line"><span class="comment"># Compute log probability of generating true target words</span></span><br><span class="line">target_gold_words_log_prob = torch.gather(P, index=target_padded[<span class="number">1</span>:].unsqueeze(<span class="number">-1</span>), dim=<span class="number">-1</span>).squeeze(<span class="number">-1</span>) * target_masks[<span class="number">1</span>:]</span><br><span class="line">scores = target_gold_words_log_prob.sum(dim=<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+<h4 id="2-5-反向传播，梯度的更新"><a href="#2-5-反向传播，梯度的更新" class="headerlink" title="2.5 反向传播，梯度的更新"></a>2.5 反向传播，梯度的更新</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">optimizer.zero_grad() <span class="comment"># 所有参数的梯度值设置为0</span></span><br><span class="line">batch_size = len(src_sents)</span><br><span class="line">example_losses = -model(src_sents, tgt_sents) <span class="comment"># (batch_size,)</span></span><br><span class="line">batch_loss = example_losses.sum()</span><br><span class="line">loss = batch_loss / batch_size</span><br><span class="line">loss.backward()</span><br><span class="line">grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), clip_grad)</span><br><span class="line">optimizer.step()</span><br></pre></td></tr></table></figure>
+<h3 id="3-机器翻译解码（预测）过程"><a href="#3-机器翻译解码（预测）过程" class="headerlink" title="3. 机器翻译解码（预测）过程"></a>3. 机器翻译解码（预测）过程</h3><p>​      解码过程，主要使用beam search算法，通过设定beam_size大小，得到多个候选译文及概率得分值。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/10/30/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" rel="prev" title="循环神经网络">
+      <i class="fa fa-chevron-left"></i> 循环神经网络
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/05/31/python-language/" rel="next" title="python 的动态类型">
+      python 的动态类型 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-机器翻译技术"><span class="nav-number">1.</span> <span class="nav-text">1. 机器翻译技术</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-NMT机器翻译模型训练过程"><span class="nav-number">2.</span> <span class="nav-text">2. NMT机器翻译模型训练过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-数据预处理"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 数据预处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-词向量embedding映射"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 词向量embedding映射</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-前向传播"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 前向传播</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-计算batch-loss"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 计算batch loss</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-5-反向传播，梯度的更新"><span class="nav-number">2.5.</span> <span class="nav-text">2.5 反向传播，梯度的更新</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-机器翻译解码（预测）过程"><span class="nav-number">3.</span> <span class="nav-text">3. 机器翻译解码（预测）过程</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">mjbjtu</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">17</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/mjbjtu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;mjbjtu" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/void_sky@163.com" title="E-Mail → void_sky@163.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.linkedin.com/in/%E5%86%9B-%E9%A9%AC-44bb7212b/" title="LinkedIn → https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;军-马-44bb7212b&#x2F;" rel="noopener" target="_blank"><i class="linkedin fa-fw"></i>LinkedIn</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">mjbjtu</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+    
+
+  
+
+</body>
+</html>
