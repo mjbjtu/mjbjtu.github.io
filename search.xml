@@ -1315,6 +1315,7 @@ tgt\_batch = \left[
     <title>ensemble_learning</title>
     <url>/2020/06/10/ensemble-learning/</url>
     <content><![CDATA[<h2 id="集成学习综述"><a href="#集成学习综述" class="headerlink" title="集成学习综述"></a>集成学习综述</h2><h3 id="1-绪论"><a href="#1-绪论" class="headerlink" title="1.绪论"></a>1.绪论</h3><p>​    集成学习通过结合多个基学习器（base estimator)以提高整体的预测（分类，回归）性能。其中，基学习器可以是任何类型的机器学习模型（例如，决策树、神经网络，SVM，线性回归等），集成学习的一个重要前提是：通过结合多个模型，可以使单个模型的误差能够通过其他模型进行弥补。</p>
+<a id="more"></a>
 <h3 id="2-集成学习的起源和基础原理"><a href="#2-集成学习的起源和基础原理" class="headerlink" title="2.集成学习的起源和基础原理"></a>2.集成学习的起源和基础原理</h3><h4 id="2-1-背景"><a href="#2-1-背景" class="headerlink" title="2.1 背景"></a>2.1 背景</h4><p>集成学习被认为是群体智慧的机器学习一种解释，通常当基学习器（例如决策树）的学习成本比较低的时候，集成学习的效果会非常好。满足以下标准的情况下群体智慧（集成学习）有可能超过单个决策：</p>
 <ul>
 <li>Independence，独立性: 个体的意见不受其他个体的影响</li>
@@ -1341,29 +1342,29 @@ tgt\_batch = \left[
 <li><strong>Class imbalance: 类别样本分不均衡</strong>，在很多机器学习问题中往往存在类别分布不均衡的问题，即某个类别的数量很多，而其他类别的个数数量则比较少。对这样的数据集进行拟合的时候，预测结果往往是更加偏向数量多的类别。利用集成学习解决这个问题的的方法一：可以用类别分布均衡的样本训练多个模型，再对结果进行集成融合（Nikulin &amp;Ng 2009)；方法二：随机下采样的方法结合集成方法（例如bagging or  boosting)可以有效改进类别不均衡预测的性能（Galar, Ferandez &amp; Herrera 2012)；方法三：利用EUSBoost 方法更进一步提升预测的性能（Galar, Fernandez, Barrenechea, &amp; 2013</li>
 <li><strong>Concept drift: 概念漂移</strong>， 在很多实时机器学习应用中，特征的分布和标签随着时间都会改变。这种情况常常会随着时间的变化影响预测性能，基于集成的方法可以作为这类问题的一个补救措施。</li>
 <li><p><strong>Curse of dimensionality 维数灾难：</strong> 特征维度的增加通常会使得模型的搜索空间指数级的增长，因此模型拟合的概率就不能够泛化，这种现象称之为维数灾难。Bryll, Gutierrez-Osuna, and Quek(2003) 提出了一种方法attribute bagging(AB)，利用这种方法的每一个基学习器的训练是通过随机选择一个特征子集来完成的；Huang, Fang, &amp;Fan 2010) IDF (Improved decision forest)指定一个特征选择机制，训练决策森林（多个决策树）解决高维度的问题；Kumar&amp; Minz, 2016 OFSP(optimal feature set partitioning )方法提前创建一个固定数量的特征视图达到降低维度的目的。</p>
-<p><strong><font color="blue">总结：这三类问题本质上都是数据样本有偏差，所以不能通过单一的模型进行建模，不然建模的结果也是有偏差的。</font></strong></p>
+<p><b><font color="blue">总结：这三类问题本质上都是数据样本有偏差，所以不能通过单一的模型进行建模，不然建模的结果也是有偏差的。</font></b></p>
 </li>
 </ul>
 <h3 id="3-如何构建集成学习模型（方法论）"><a href="#3-如何构建集成学习模型（方法论）" class="headerlink" title="3. 如何构建集成学习模型（方法论）"></a>3. 如何构建集成学习模型（方法论）</h3><p>​    给定一个数据集$D$，包含$m$个样本，每个样本的维度为$n$，即$D=\{(x^i,y^i)\}(|D|=m,x^i \in R^n,y\in R)$<br>集成模型$\phi$是$K$个基模型的融合，{$f_1,f_2,..,f_k$}:</p>
 <p>​                                                        $\hat{y_i}=\phi(x_i)=G(f_1,f_2,…,f_k)$</p>
 <p>​    如果$\hat{y_i}\in R$，则表示该问题是一个回归问题，如果$\hat{y_i}\in Z$则表示该问题是一个分类问题。给定集成模型的通用框架后，那么构建一个集成模型就涉及两个步骤：</p>
 <ul>
-<li>训练基模型型方法论（<font color="blue"><strong>如何训练基模型</strong></font>）</li>
-<li>基模型输出结果的组合策略（<font color="blue"><strong>如何组合基模型结果</strong></font>）</li>
+<li>训练基模型型方法论（<font color="blue"><b>如何训练基模型</b></font>）</li>
+<li>基模型输出结果的组合策略（<font color="blue"><b>如何组合基模型结果</b></font>）</li>
 </ul>
 <h4 id="3-1-基模型训练"><a href="#3-1-基模型训练" class="headerlink" title="3.1 基模型训练"></a>3.1 基模型训练</h4><ol>
-<li><font color="green"> **训练基模型应该遵从两个准则**：</font>
+<li><font color="green"> <b>训练基模型应该遵从两个准则</b>：</font>
 </li>
 </ol>
 <ul>
 <li><p>Diversity: 多样性，集成模型的能取得较好的性能原因是因为基模型的多样性（Deng, Runger, Tuv, &amp;Vladimir, 2013)。因此，集成模型的每个基模型应该最大可能的不同</p>
 </li>
 <li><p>Predictive performance: 基模型的预测性能应该尽可能越高越好，最起码要好于随机结果</p>
-<font color="blue">**总结：要获得好的集成效果，基模型应“好而不同”，即基模型要有一定的准确性，不能性能太差。同时，要尽可能多样性**</font>
+<font color="blue"><b>总结：要获得好的集成效果，基模型应“好而不同”，即基模型要有一定的准确性，不能性能太差。同时，要尽可能多样性</b></font>
 </li>
 </ul>
 <ol>
-<li><font color="green">**为了达到基模型多样性这个目标，有以下的几种方法：**</font>
+<li><font color="green"><b>为了达到基模型多样性这个目标，有以下的几种方法：</b></font>
 </li>
 </ol>
 <ul>
@@ -1380,7 +1381,7 @@ tgt\_batch = \left[
 <li><p>Output manipulation: 输出结果操作，将多个二分类模型的输出结果结合，解决多分类问题。</p>
 </li>
 <li><p>Ensemble hybridization：集成混合，在构建基模型的时候考虑至少两种策略以增加其多样性。例如，随机森林在构建基模型（每棵树）的时候，其训练子集是随机选择构建的，并且在每棵树的学习过程中，每个节点随机选择一个特征子集进行构建。</p>
-<font color="blue">**总结：基模型的多样性是从两个角度出发考虑的：数据，算法**</font>
+<font color="blue"><b>总结：基模型的多样性是从两个角度出发考虑的：数据，算法</b></font>
 
 </li>
 </ul>
@@ -1471,9 +1472,10 @@ tgt\_batch = \left[
 </tbody>
 </table>
 </div>
+<h4 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h4><p>[1] Ensemble learning: A survey Omer Sagi | Lior Rokach</p>
 ]]></content>
-      <tags>
-        <tag>机器学习</tag>
-      </tags>
+      <categories>
+        <category>机器学习</category>
+      </categories>
   </entry>
 </search>
