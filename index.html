@@ -154,6 +154,220 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://mjbjtu.github.io/2020/06/10/ensemble-learning/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="mjbjtu">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="每天进步一点">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/06/10/ensemble-learning/" class="post-title-link" itemprop="url">ensemble_learning</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-06-10 08:34:24" itemprop="dateCreated datePublished" datetime="2020-06-10T08:34:24+08:00">2020-06-10</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="集成学习综述"><a href="#集成学习综述" class="headerlink" title="集成学习综述"></a>集成学习综述</h2><h3 id="1-绪论"><a href="#1-绪论" class="headerlink" title="1.绪论"></a>1.绪论</h3><p>​    集成学习通过结合多个基学习器（base estimator)以提高整体的预测（分类，回归）性能。其中，基学习器可以是任何类型的机器学习模型（例如，决策树、神经网络，SVM，线性回归等），集成学习的一个重要前提是：通过结合多个模型，可以使单个模型的误差能够通过其他模型进行弥补。</p>
+<h3 id="2-集成学习的起源和基础原理"><a href="#2-集成学习的起源和基础原理" class="headerlink" title="2.集成学习的起源和基础原理"></a>2.集成学习的起源和基础原理</h3><h4 id="2-1-背景"><a href="#2-1-背景" class="headerlink" title="2.1 背景"></a>2.1 背景</h4><p>集成学习被认为是群体智慧的机器学习一种解释，通常当基学习器（例如决策树）的学习成本比较低的时候，集成学习的效果会非常好。满足以下标准的情况下群体智慧（集成学习）有可能超过单个决策：</p>
+<ul>
+<li>Independence，独立性: 个体的意见不受其他个体的影响</li>
+<li>Decentralization去中心化：个体能够根据局部的信息专业化地做出决定</li>
+<li>Diversity of opinions 多样性: 单个个体都需要保有自己的私有信息，即使信息可能有偏差</li>
+<li><p>Aggregation: 存在某些机制（方法），能够将个体的决策转变为整体的决策结果</p>
+<p><strong>集成学习早期相关研究：</strong></p>
+</li>
+<li><p>1977年，Turkey建议用两个线性回归模型进行集成，即第一个线性模型拟合原始数据，第二个模型拟合残差</p>
+</li>
+<li>1979年，Dasarathy和Sheela建议用两个或多个分类器解决多类别的分类问题</li>
+<li>1990年，Hansen和Salamon首次证明，通过集成多个神经网络模型能够减少神经网络模型的泛化误差</li>
+<li>1990年，Schapire介绍如何将多个弱学习器进行结合，从而近似得到一个强学习器，也就是Adaboost算法基础原型</li>
+<li>2008年，Oza和Tumer介绍了集成学习在遥感，人物识别，一对多识别的应用</li>
+<li>（2016, 2017年）其他包括对象检测，教育和恶意软件检测方面，集成学习都有很好的效果</li>
+</ul>
+<h4 id="2-2-集成学习为什么有效？"><a href="#2-2-集成学习为什么有效？" class="headerlink" title="2.2  集成学习为什么有效？"></a>2.2  集成学习为什么有效？</h4><ul>
+<li>Over fitting avoidance 避免过拟合：如果能够获得的<strong>数据集规模量比较小</strong>的时候，通常算法能够对训练集进行很好的拟合，但是在测试集上的性能就下降的很厉害（过拟合）。通过将多个学习器的预测结果进行平均，就能够减少单个模型预测的误差，从而提高整体的性能</li>
+<li>Computational advantage 计算优势：单个学习器进行的是局部的搜索，可能得到的是局部优化解决。多个学习器结合，能够避免单学习器得到局部最小值的风险，例如神经网络的训练不能保证单个模型找到最优解</li>
+<li>Representation: 单个基模型的表征能力有限，不能够充分对数据集进行建模，所有结合多个基模型能够提升表征能力。如图所示，是多个决策桩的集成</li>
+</ul>
+<p><img src="/2020/06/10/ensemble-learning/decsion tree tumb.png" alt="decsion tree tumb"></p>
+<h4 id="2-3-集成学习还能够解决哪些机器学习问题？"><a href="#2-3-集成学习还能够解决哪些机器学习问题？" class="headerlink" title="2.3 集成学习还能够解决哪些机器学习问题？"></a>2.3 集成学习还能够解决哪些机器学习问题？</h4><ul>
+<li><strong>Class imbalance: 类别样本分不均衡</strong>，在很多机器学习问题中往往存在类别分布不均衡的问题，即某个类别的数量很多，而其他类别的个数数量则比较少。对这样的数据集进行拟合的时候，预测结果往往是更加偏向数量多的类别。利用集成学习解决这个问题的的方法一：可以用类别分布均衡的样本训练多个模型，再对结果进行集成融合（Nikulin &amp;Ng 2009)；方法二：随机下采样的方法结合集成方法（例如bagging or  boosting)可以有效改进类别不均衡预测的性能（Galar, Ferandez &amp; Herrera 2012)；方法三：利用EUSBoost 方法更进一步提升预测的性能（Galar, Fernandez, Barrenechea, &amp; 2013</li>
+<li><strong>Concept drift: 概念漂移</strong>， 在很多实时机器学习应用中，特征的分布和标签随着时间都会改变。这种情况常常会随着时间的变化影响预测性能，基于集成的方法可以作为这类问题的一个补救措施。</li>
+<li><p><strong>Curse of dimensionality 维数灾难：</strong> 特征维度的增加通常会使得模型的搜索空间指数级的增长，因此模型拟合的概率就不能够泛化，这种现象称之为维数灾难。Bryll, Gutierrez-Osuna, and Quek(2003) 提出了一种方法attribute bagging(AB)，利用这种方法的每一个基学习器的训练是通过随机选择一个特征子集来完成的；Huang, Fang, &amp;Fan 2010) IDF (Improved decision forest)指定一个特征选择机制，训练决策森林（多个决策树）解决高维度的问题；Kumar&amp; Minz, 2016 OFSP(optimal feature set partitioning )方法提前创建一个固定数量的特征视图达到降低维度的目的。</p>
+<p><strong><font color="blue">总结：这三类问题本质上都是数据样本有偏差，所以不能通过单一的模型进行建模，不然建模的结果也是有偏差的。</font></strong></p>
+</li>
+</ul>
+<h3 id="3-如何构建集成学习模型（方法论）"><a href="#3-如何构建集成学习模型（方法论）" class="headerlink" title="3. 如何构建集成学习模型（方法论）"></a>3. 如何构建集成学习模型（方法论）</h3><p>​    给定一个数据集$D$，包含$m$个样本，每个样本的维度为$n$，即$D=\{(x^i,y^i)\}(|D|=m,x^i \in R^n,y\in R)$<br>集成模型$\phi$是$K$个基模型的融合，{$f_1,f_2,..,f_k$}:</p>
+<p>​                                                        $\hat{y_i}=\phi(x_i)=G(f_1,f_2,…,f_k)$</p>
+<p>​    如果$\hat{y_i}\in R$，则表示该问题是一个回归问题，如果$\hat{y_i}\in Z$则表示该问题是一个分类问题。给定集成模型的通用框架后，那么构建一个集成模型就涉及两个步骤：</p>
+<ul>
+<li>训练基模型型方法论（<font color="blue"><strong>如何训练基模型</strong></font>）</li>
+<li>基模型输出结果的组合策略（<font color="blue"><strong>如何组合基模型结果</strong></font>）</li>
+</ul>
+<h4 id="3-1-基模型训练"><a href="#3-1-基模型训练" class="headerlink" title="3.1 基模型训练"></a>3.1 基模型训练</h4><ol>
+<li><font color="green"> **训练基模型应该遵从两个准则**：</font>
+</li>
+</ol>
+<ul>
+<li><p>Diversity: 多样性，集成模型的能取得较好的性能原因是因为基模型的多样性（Deng, Runger, Tuv, &amp;Vladimir, 2013)。因此，集成模型的每个基模型应该最大可能的不同</p>
+</li>
+<li><p>Predictive performance: 基模型的预测性能应该尽可能越高越好，最起码要好于随机结果</p>
+<font color="blue">**总结：要获得好的集成效果，基模型应“好而不同”，即基模型要有一定的准确性，不能性能太差。同时，要尽可能多样性**</font>
+</li>
+</ul>
+<ol>
+<li><font color="green">**为了达到基模型多样性这个目标，有以下的几种方法：**</font>
+</li>
+</ol>
+<ul>
+<li><p>Input manipulation(输入操作): 每个基模型采用不同的训练子集进行训练，即训练样本的多样性</p>
+</li>
+<li><p>Manipulated learning algorithm(学习算法修改)：修改基模型使其具有差异性，例如在构建决策树的时候，可以在k-best分割属性随机选择一个属性作为分割点；另外，可以使用不同的超参数训练不同的基模型，例如神经网络，即基模型的多样性</p>
+</li>
+<li><p>Partitioning: 分割， 即将原始的数据集分割称为多个小的数据子集，然后用每个数据子集训练一个基模型。</p>
+<ul>
+<li>水平分割：从样本维度上进行分割，即每个子集的特征维度是一样的</li>
+<li>垂直分割：从特征维度进行分割，每个子集的样本个数一样，但是特征不一样</li>
+</ul>
+</li>
+<li><p>Output manipulation: 输出结果操作，将多个二分类模型的输出结果结合，解决多分类问题。</p>
+</li>
+<li><p>Ensemble hybridization：集成混合，在构建基模型的时候考虑至少两种策略以增加其多样性。例如，随机森林在构建基模型（每棵树）的时候，其训练子集是随机选择构建的，并且在每棵树的学习过程中，每个节点随机选择一个特征子集进行构建。</p>
+<font color="blue">**总结：基模型的多样性是从两个角度出发考虑的：数据，算法**</font>
+
+</li>
+</ul>
+<h4 id="3-2-融合基模型预测结果"><a href="#3-2-融合基模型预测结果" class="headerlink" title="3.2 融合基模型预测结果"></a>3.2 融合基模型预测结果</h4><p>​    输出融合指的是将多个基模型的（预测）输出融合为单个结果，主要有两类方法：</p>
+<ul>
+<li>Weighting methods: 加权方法<ul>
+<li>简单平均（回归）和投票（分类），每个基模型的性能是具有可比性的</li>
+<li>其他方法有根据验证集上基模型的性能表现，为各个基模型确定不同的权重系数</li>
+</ul>
+</li>
+<li>Meta-Learning methods: 元学习<ul>
+<li>stacking</li>
+<li>Mix of Experts</li>
+<li>以及其他各种变体</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-集成学习方法"><a href="#4-集成学习方法" class="headerlink" title="4.集成学习方法"></a>4.集成学习方法</h3><p>​    已有的集成学习方法可以分为两类：dependent（非独立结构） &amp; independent（独立结构）。</p>
+<ul>
+<li>dependent(非独立结构)：当前基模型的输出结果都会影响下一个基模型的构建过程</li>
+<li>independent(独立结构)： 每个基模型的构建过程彼此独立，互不影响</li>
+</ul>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Dependency</th>
+<th>Training method</th>
+<th>Fusion</th>
+<th>Method</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Dependent</td>
+<td>Input manipulation</td>
+<td>Weighting</td>
+<td>Adaboost</td>
+</tr>
+<tr>
+<td style="text-align:left">Dependent</td>
+<td>Output manipulation</td>
+<td>Weighting</td>
+<td>Gradient Boosting</td>
+</tr>
+<tr>
+<td style="text-align:left">Independent</td>
+<td>Input manipulation</td>
+<td>Weighting</td>
+<td>Bagging</td>
+</tr>
+<tr>
+<td style="text-align:left">Independent</td>
+<td>Ensemble hybridization</td>
+<td>Weighting</td>
+<td>Random Forest</td>
+</tr>
+<tr>
+<td style="text-align:left">Independent</td>
+<td>Ensemble hybridization</td>
+<td>Weighting</td>
+<td>Random subspace methods</td>
+</tr>
+<tr>
+<td style="text-align:left">Independent</td>
+<td>Output manipulation</td>
+<td>Weighting</td>
+<td>Error-correction output codes</td>
+</tr>
+<tr>
+<td style="text-align:left">Independent</td>
+<td>Manipulated Learning</td>
+<td>Weighting</td>
+<td>Rotation forest</td>
+</tr>
+<tr>
+<td style="text-align:left">Independent</td>
+<td>Partitioning</td>
+<td>Weighting</td>
+<td>Extremely randomized trees</td>
+</tr>
+<tr>
+<td style="text-align:left">Independent</td>
+<td>Manipulated Learning</td>
+<td>Stacking</td>
+<td>Meta-Learning</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
     <link itemprop="mainEntityOfPage" href="http://mjbjtu.github.io/2020/05/31/python-language/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -877,83 +1091,6 @@ P(tgt|src)= \frac{P(tgt*src)}{P(src)} = \frac{P{(src|tgt)*P(tgt)}}{P(src)}</scri
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
-    <link itemprop="mainEntityOfPage" href="http://mjbjtu.github.io/2017/04/15/vim-config/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="mjbjtu">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="每天进步一点">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2017/04/15/vim-config/" class="post-title-link" itemprop="url">vim_config</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2017-04-15 21:58:51" itemprop="dateCreated datePublished" datetime="2017-04-15T21:58:51+08:00">2017-04-15</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="1-引言"><a href="#1-引言" class="headerlink" title="1. 引言"></a>1. 引言</h3><p>　　 1. vim是一款功能强大的文本编辑器，如果使用熟练，将会有效帮助我们提高编辑文本、程序的效率。vim编辑器的上手使用门槛比较高，很多人怯于要记很多命令，往往在学习的初期阶段就望而却步。</p>
-<p>　　 2. vim的学习需要不断的练习、使用，只有强迫自己不断的使用，才能在使用的过程中记住那些看似复杂的命令，但是如果一旦习惯了vim的编辑模式，就会觉得vim真的会帮助我们提高文本编辑效率。</p>
-<ol>
-<li><p>关于vim学习资料，其本自带的vim帮助文档，就足够丰富，可以在学习的过程不断查阅。另外，也有一个简化的入手文档即vimtutor，在命令行输入vimtutor，便可以开始学习，大概不到一个小时就可以学习并练习完。</p></li></ol>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2017/04/15/vim-config/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1023,7 +1160,7 @@ P(tgt|src)= \frac{P(tgt*src)}{P(src)} = \frac{P{(src|tgt)*P(tgt)}}{P(src)}</scri
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">17</span>
+          <span class="site-state-item-count">18</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -1032,6 +1169,11 @@ P(tgt|src)= \frac{P(tgt*src)}{P(src)} = \frac{P{(src|tgt)*P(tgt)}}{P(src)}</scri
           
         <span class="site-state-item-count">4</span>
         <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">tags</span></a>
       </div>
   </nav>
 </div>
